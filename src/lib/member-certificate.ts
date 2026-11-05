@@ -62,6 +62,14 @@ export async function generateCertificate(member: MemberView) {
     ctx.beginPath(); ctx.moveTo(15, 70); ctx.lineTo(15, 15); ctx.lineTo(70, 15); ctx.stroke();
     ctx.translate(27, 27); ctx.rotate(Math.PI / 4); ctx.strokeRect(-8, -8, 16, 16); ctx.restore();
   }
+  // Navy inner border and golden corner ribbons.
+  ctx.strokeStyle = navy; ctx.lineWidth = 3; ctx.strokeRect(62, 62, 1560, 1066);
+  for (const [x, y, angle] of [[0, 0, 0], [1684, 0, Math.PI / 2], [1684, 1190, Math.PI], [0, 1190, -Math.PI / 2]] as const) {
+    ctx.save(); ctx.translate(x, y); ctx.rotate(angle);
+    ctx.fillStyle = navy; ctx.beginPath(); ctx.moveTo(0, 150); ctx.lineTo(150, 0); ctx.lineTo(205, 0); ctx.lineTo(0, 205); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = gold; ctx.beginPath(); ctx.moveTo(0, 175); ctx.lineTo(175, 0); ctx.lineTo(190, 0); ctx.lineTo(0, 190); ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
   const text = (value: string, y: number, size: number, color = navy, bold = false, maxWidth = 1400, x = 842, align: CanvasTextAlign = "center", serif = false) => {
     ctx.fillStyle = color; ctx.textAlign = align;
     let s = size;
@@ -80,9 +88,13 @@ export async function generateCertificate(member: MemberView) {
   text("Together for a Better Tomorrow", 301, 22, muted);
   text("NGO MEMBER CERTIFICATE", 405, 64, navy, true, 1420, 842, "center", true);
   ctx.strokeStyle = gold; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(450, 440); ctx.lineTo(1234, 440); ctx.stroke();
-  text(`Membership Certificate No. ${member.certificate_number}`, 485, 19, muted);
-  const center = photo ? 1000 : 842;
-  const width = photo ? 1040 : 1370;
+  // Highlighted certificate number box on the right.
+  ctx.fillStyle = navy; ctx.fillRect(1290, 520, 290, 96);
+  ctx.strokeStyle = gold; ctx.lineWidth = 3; ctx.strokeRect(1296, 526, 278, 84);
+  text("CERTIFICATE NO.", 558, 16, gold, true, 260, 1435);
+  text(member.certificate_number, 594, 22, paper, true, 260, 1435);
+  const center = photo ? 820 : 760;
+  const width = photo ? 880 : 1000;
   if (photo) {
     const r = Math.min(218 / photo.width, 245 / photo.height);
     ctx.drawImage(photo, 127 + (218 - photo.width * r) / 2, 539 + (245 - photo.height * r) / 2, photo.width * r, photo.height * r);
@@ -96,7 +108,7 @@ export async function generateCertificate(member: MemberView) {
   const joining = new Date(member.joining_date + "T12:00:00").toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
   text(`Joining date: ${joining}`, 866, 22, navy, false, 690, 475);
   text(`Issue date: ${certificateIssueDate(member.created_at)}`, 866, 22, navy, false, 690, 1210);
-  text(`Certificate status: ${member.status.toUpperCase()}`, 909, 18, muted, true);
+  text("Together we can make a difference.", 912, 24, gold, true, 900, 842, "center", true);
   ctx.drawImage(qr, 113, 935, 155, 155);
   text("Verify membership", 1112, 15, muted, false, 220, 191);
   const sr = Math.min(250 / signature.width, 86 / signature.height);
@@ -104,9 +116,10 @@ export async function generateCertificate(member: MemberView) {
   ctx.strokeStyle = gold; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(1207, 1046); ctx.lineTo(1512, 1046); ctx.stroke();
   text(certificateDetails.signatoryName, 1076, 23, navy, true, 310, 1360);
   text("Authorized Signatory", 1105, 17, muted, false, 310, 1360);
-  text(`Registration No. ${certificateDetails.registrationNumber}`, 993, 18, muted, false, 800);
-  text(`Unique Identification No. ${certificateDetails.uniqueIdentificationNumber}`, 1030, 18, muted, false, 800);
-  text(site.email, 1084, 18, navy, false, 800);
+  text(`NGO Name: ${certificateDetails.societyName}`, 985, 18, navy, true, 800);
+  text(`NGO Registration Number: ${certificateDetails.registrationNumber}`, 1020, 18, muted, false, 800);
+  text(`Unique Identification Number: ${certificateDetails.uniqueIdentificationNumber}`, 1055, 18, muted, false, 800);
+  text(site.email, 1095, 16, navy, false, 800);
   photo?.close(); signature.close();
   const preview = canvas.toDataURL("image/png");
   const { PDFDocument } = await import("pdf-lib");
