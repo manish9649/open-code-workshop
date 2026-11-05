@@ -43,7 +43,7 @@ export async function generateCertificate(member: MemberView) {
   const QRCode = await import("qrcode");
   const [photo, signature, qr] = await Promise.all([
     member.photo_url ? loadImage(member.photo_url) : Promise.resolve(null),
-    loadImage(member.signature_url),
+    loadImage("/authorized-signature.png"),
     QRCode.toCanvas(certificateVerificationUrl(member.certificate_number), { width: 210, margin: 4, errorCorrectionLevel: "M" }),
   ]);
   const canvas = document.createElement("canvas"); canvas.width = 1684; canvas.height = 1190;
@@ -92,7 +92,7 @@ export async function generateCertificate(member: MemberView) {
   ctx.fillStyle = navy; ctx.fillRect(1290, 520, 290, 96);
   ctx.strokeStyle = gold; ctx.lineWidth = 3; ctx.strokeRect(1296, 526, 278, 84);
   text("CERTIFICATE NO.", 558, 16, gold, true, 260, 1435);
-  text(member.certificate_number, 594, 22, paper, true, 260, 1435);
+  text(shortCertificateNumber(member.certificate_number), 594, 26, paper, true, 260, 1435);
   const center = photo ? 820 : 760;
   const width = photo ? 880 : 1000;
   if (photo) {
@@ -143,4 +143,9 @@ export async function shareCertificate(blob: Blob, member: MemberView) {
     try { await navigator.share({ files: [file], title: `${site.name} Membership Certificate` }); }
     catch (error) { if (!(error instanceof DOMException && error.name === "AbortError")) throw error; }
   } else downloadCertificate(blob, member.certificate_number);
+}
+/** Short, readable form of the certificate number for printing (QR keeps the full number). */
+export function shortCertificateNumber(number: string) {
+  const m = /^SSWS-([0-9A-F]{8})/i.exec(number);
+  return m ? `SSWS-${m[1]!.toUpperCase()}` : number;
 }
