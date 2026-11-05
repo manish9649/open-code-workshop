@@ -56,7 +56,7 @@ export async function generateCertificate(member: MemberView) {
   ctx.strokeStyle = gold; ctx.lineWidth = 6; ctx.strokeRect(35, 35, 1614, 1120);
   ctx.lineWidth = 1.5; ctx.strokeRect(51, 51, 1582, 1088);
   // Symmetrical, geometric print ornaments, not a fabricated signature.
-  for (const [x, y, angle] of [[65, 65, 0], [1619, 65, Math.PI / 2], [1619, 1125, Math.PI], [65, 1125, -Math.PI / 2]]) {
+  for (const [x, y, angle] of [[65, 65, 0], [1619, 65, Math.PI / 2], [1619, 1125, Math.PI], [65, 1125, -Math.PI / 2]] as const) {
     ctx.save(); ctx.translate(x, y); ctx.rotate(angle); ctx.strokeStyle = gold; ctx.lineWidth = 3;
     ctx.beginPath(); ctx.moveTo(0, 105); ctx.lineTo(0, 0); ctx.lineTo(105, 0); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(15, 70); ctx.lineTo(15, 15); ctx.lineTo(70, 15); ctx.stroke();
