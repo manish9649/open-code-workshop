@@ -1,0 +1,11 @@
+# Website completion
+- [x] Add Kawar Yatra Seva, Grow Trees, and Clothes Distribution to Home and Our Causes with images and animated details.
+- [x] Verify new cause links, donation choices, and mobile/desktop layouts.
+- [x] Finish page layout, navigation, and accessibility.
+- [x] Remove dead links and clarify unavailable payments/message delivery.
+- [x] Verify every page and forms on desktop and mobile.
+- [ ] Real contact details, verified impact figures, and live services — waiting for organization details and payment setup.
+- [x] Admin account set up for shivseva1707@gmail.com.
+- [x] Add secure member registration, unique certificates, search, editing and deletion.
+- [x] Verify membership certificate downloads and mobile/desktop admin workflows.
+- [ ] Update official certificate design, details and QR verification; verify PDF and mobile/desktop flows.

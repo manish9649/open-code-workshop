@@ -1,0 +1,147 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Download, Plus, X } from "lucide-react";
+import { useMemo, useState, type FormEvent } from "react";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { donationsQuery } from "@/lib/admin-data";
+import { donationCauseOptions } from "@/lib/causes";
+import { dt, donationRow, downloadCSV, inr, METHODS, methodLabel, STATUSES, type Donation, type DonationStatus } from "@/lib/donations";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Empty, PageTitle, selectCls, StatusBadge } from "@/components/admin/AdminBits";
+
+export const Route = createFileRoute("/admin/donations")({
+  head: () => ({ meta: [{ title: "Donations | Admin" }, { name: "robots", content: "noindex" }] }),
+  component: DonationsPage,
+});
+
+function DonationsPage() {
+  const q = useQuery(donationsQuery);
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState<"" | DonationStatus>("");
+  const [cause, setCause] = useState("");
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const [open, setOpen] = useState<Donation | null>(null);
+  const [adding, setAdding] = useState(false);
+
+  const list = useMemo(() => (q.data ?? []).filter((d) => {
+    const s = search.trim().toLowerCase();
+    if (s && ![d.donor_name, d.email, d.transaction_ref].some((x) => x.toLowerCase().includes(s))) return false;
+    if (status && d.status !== status) return false;
+    if (cause && d.cause !== cause) return false;
+    const day = d.created_at.slice(0, 10);
+    if (from && day < from) return false;
+    if (to && day > to) return false;
+    return true;
+  }), [q.data, search, status, cause, from, to]);
+  const counts = Object.fromEntries(STATUSES.map((s) => [s, (q.data ?? []).filter((d) => d.status === s).length]));
+
+  return (
+    <div>
+      <PageTitle title="Donations" sub="Only verified payments count as confirmed donations.">
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => downloadCSV("donations.csv", list.map(donationRow))}><Download />Export CSV</Button>
+          <Button variant="saffron" onClick={() => setAdding(true)}><Plus />Record donation</Button>
+        </div>
+      </PageTitle>
+      <div className="mb-4 flex flex-wrap gap-2">
+        <button type="button" onClick={() => setStatus("")} className={`rounded-full border px-3 py-1 text-sm ${!status ? "border-forest bg-secondary font-bold" : ""}`}>All ({q.data?.length ?? 0})</button>
+        {STATUSES.map((s) => <button key={s} type="button" onClick={() => setStatus(s)} className={`rounded-full border px-3 py-1 text-sm capitalize ${status === s ? "border-forest bg-secondary font-bold" : ""}`}>{s} ({counts[s]})</button>)}
+      </div>
+      <div className="mb-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+        <Input placeholder="Search name, email or transaction ID" value={search} onChange={(e) => setSearch(e.target.value)} aria-label="Search" />
+        <select className={selectCls} value={cause} onChange={(e) => setCause(e.target.value)} aria-label="Cause"><option value="">All causes</option>{donationCauseOptions.map((c) => <option key={c}>{c}</option>)}</select>
+        <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} aria-label="From date" />
+        <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} aria-label="To date" />
+      </div>
+      {q.isLoading ? <p>Loading donations…</p> : q.error ? <p className="text-destructive">Could not load donations: {(q.error as Error).message}</p> : !list.length ? (
+        <Empty>{q.data?.length ? "No donations match these filters." : "No donations recorded yet. Use “Record donation” to add a bank transfer, UPI, cash or cheque donation."}</Empty>
+      ) : (
+        <div className="overflow-x-auto rounded-xl border bg-card">
+          <table className="w-full text-sm">
+            <thead className="bg-secondary text-left"><tr>{["ID", "Donor", "Email", "Phone", "Amount", "Cause", "Method", "Txn / UTR", "Status", "Date"].map((h) => <th key={h} className="whitespace-nowrap px-3 py-2">{h}</th>)}</tr></thead>
+            <tbody>{list.map((d) => (
+              <tr key={d.id} onClick={() => setOpen(d)} className="cursor-pointer border-t hover:bg-secondary/50">
+                <td className="px-3 py-2 font-mono text-xs">{d.id.slice(0, 8)}</td><td className="px-3 py-2 font-semibold">{d.donor_name}</td><td className="px-3 py-2">{d.email}</td><td className="px-3 py-2">{d.phone}</td>
+                <td className="px-3 py-2 font-semibold">{inr(d.amount)}</td><td className="px-3 py-2">{d.cause}</td><td className="px-3 py-2">{methodLabel(d.payment_method)}</td><td className="px-3 py-2 font-mono text-xs">{d.transaction_ref}</td>
+                <td className="px-3 py-2"><StatusBadge s={d.status} /></td><td className="whitespace-nowrap px-3 py-2">{dt(d.created_at)}</td>
+              </tr>))}</tbody>
+          </table>
+        </div>
+      )}
+      {open && <Details d={(q.data ?? []).find((x) => x.id === open.id) ?? open} onClose={() => setOpen(null)} />}
+      {adding && <AddForm onClose={() => setAdding(false)} />}
+    </div>
+  );
+}
+
+function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 p-4" onClick={onClose}>
+      <div role="dialog" aria-label={title} className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl bg-card p-6" onClick={(e) => e.stopPropagation()}>
+        <div className="mb-4 flex items-center justify-between"><h3 className="text-lg font-bold text-forest">{title}</h3><button type="button" aria-label="Close" onClick={onClose}><X className="h-5 w-5" /></button></div>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function Details({ d, onClose }: { d: Donation; onClose: () => void }) {
+  const qc = useQueryClient();
+  async function setStatus(status: DonationStatus) {
+    if (status === "verified" && !confirm("Only verify after confirming the money arrived in your bank account. Continue?")) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    const { error } = await supabase.from("donations").update({ status, verified_at: status === "verified" ? new Date().toISOString() : null, verified_by: status === "verified" ? user?.id ?? null : null }).eq("id", d.id);
+    if (error) toast.error(error.message); else { toast.success(`Marked as ${status}`); qc.invalidateQueries({ queryKey: ["admin", "donations"] }); }
+  }
+  const rows: [string, React.ReactNode][] = [["Donation ID", <span className="font-mono text-xs">{d.id}</span>], ["Donor", d.donor_name], ["Email", d.email || "—"], ["Phone", d.phone || "—"], ["Amount", inr(d.amount)], ["Cause", d.cause], ["Payment method", methodLabel(d.payment_method)], ["Transaction / UTR", d.transaction_ref || "—"], ["Status", <StatusBadge s={d.status} />], ["Received", dt(d.created_at)], ["Verified at", d.verified_at ? dt(d.verified_at) : "—"], ["Notes", d.notes || "—"]];
+  return (
+    <Modal title="Donation details" onClose={onClose}>
+      <dl className="grid grid-cols-[140px_1fr] gap-y-2 text-sm">{rows.map(([k, v]) => <><dt key={k} className="text-muted-foreground">{k}</dt><dd>{v}</dd></>)}</dl>
+      <div className="mt-5 flex flex-wrap gap-2">
+        {STATUSES.filter((s) => s !== d.status).map((s) => <Button key={s} size="sm" variant={s === "verified" ? "saffron" : "outline"} onClick={() => setStatus(s)} className="capitalize">Mark {s}</Button>)}
+      </div>
+    </Modal>
+  );
+}
+
+function AddForm({ onClose }: { onClose: () => void }) {
+  const qc = useQueryClient();
+  const [f, setF] = useState({ donor_name: "", email: "", phone: "", amount: "", cause: donationCauseOptions[0] ?? "General Fund", payment_method: "bank_transfer", transaction_ref: "", notes: "", date: "" });
+  const [busy, setBusy] = useState(false);
+  async function submit(e: FormEvent) {
+    e.preventDefault();
+    const amount = Number(f.amount);
+    if (!(amount > 0)) { toast.error("Enter an amount above ₹0"); return; }
+    setBusy(true);
+    const { error } = await supabase.from("donations").insert({
+      donor_name: f.donor_name.trim(), email: f.email.trim(), phone: f.phone.trim(), amount, cause: f.cause, payment_method: f.payment_method,
+      transaction_ref: f.transaction_ref.trim(), notes: f.notes.trim(), status: "pending", ...(f.date ? { created_at: new Date(f.date + "T12:00:00").toISOString() } : {}),
+    });
+    setBusy(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Donation recorded as pending — verify it once the payment is confirmed.");
+    qc.invalidateQueries({ queryKey: ["admin", "donations"] }); onClose();
+  }
+  const set = (k: keyof typeof f) => (e: { target: { value: string } }) => setF({ ...f, [k]: e.target.value });
+  return (
+    <Modal title="Record a donation" onClose={onClose}>
+      <form onSubmit={submit} className="grid gap-3 sm:grid-cols-2">
+        <div className="sm:col-span-2"><Label htmlFor="dn">Donor name</Label><Input id="dn" required maxLength={150} value={f.donor_name} onChange={set("donor_name")} /></div>
+        <div><Label htmlFor="de">Email</Label><Input id="de" type="email" value={f.email} onChange={set("email")} /></div>
+        <div><Label htmlFor="dp">Phone (optional)</Label><Input id="dp" value={f.phone} onChange={set("phone")} /></div>
+        <div><Label htmlFor="da">Amount (₹)</Label><Input id="da" type="number" min="1" step="1" required value={f.amount} onChange={set("amount")} /></div>
+        <div><Label htmlFor="dd">Date received</Label><Input id="dd" type="date" value={f.date} onChange={set("date")} /></div>
+        <div><Label htmlFor="dc">Cause</Label><select id="dc" className={`${selectCls} w-full`} value={f.cause} onChange={set("cause")}>{donationCauseOptions.map((c) => <option key={c}>{c}</option>)}</select></div>
+        <div><Label htmlFor="dm">Payment method</Label><select id="dm" className={`${selectCls} w-full`} value={f.payment_method} onChange={set("payment_method")}>{METHODS.map((m) => <option key={m} value={m}>{methodLabel(m)}</option>)}</select></div>
+        <div className="sm:col-span-2"><Label htmlFor="dt">Transaction ID / UTR</Label><Input id="dt" value={f.transaction_ref} onChange={set("transaction_ref")} /></div>
+        <div className="sm:col-span-2"><Label htmlFor="dno">Notes</Label><Input id="dno" value={f.notes} onChange={set("notes")} /></div>
+        <p className="text-xs text-muted-foreground sm:col-span-2">New records start as pending. Mark them verified only after checking your bank statement.</p>
+        <Button type="submit" variant="saffron" disabled={busy} className="sm:col-span-2">{busy ? "Saving…" : "Save donation"}</Button>
+      </form>
+    </Modal>
+  );
+}
