@@ -16,7 +16,7 @@ import { certificateDetails } from "@/lib/certificate-details";
 export function MemberForm({ member, onClose, onSaved }: { member: MemberView | null; onClose: () => void; onSaved: (id: string) => void }) {
   const [form, setForm] = useState<MemberInput>(member ? memberSchema.parse({ ...member, signatory_name: certificateDetails.signatoryName }) : { full_name: "", father_name: "", date_of_birth: "", mobile: "", email: "", address: "", joining_date: new Date().toISOString().slice(0, 10), membership_type: "Member", status: "active", notes: "", signatory_name: certificateDetails.signatoryName });
   const [photo, setPhoto] = useState<File | null>(null);
-  const [signature, setSignature] = useState<File | null>(null);
+  const signature: File | null = null;
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
   const save = useServerFn(saveMember);
@@ -27,7 +27,6 @@ export function MemberForm({ member, onClose, onSaved }: { member: MemberView | 
     const parsed = memberSchema.safeParse(form);
     const issues: Record<string, string> = {};
     if (!parsed.success) for (const issue of parsed.error.issues) issues[String(issue.path[0])] = issue.message;
-    if (!signature && !member?.signature_path) issues['signature'] = "Upload the authorized signature.";
     for (const [key, file] of [["photo", photo], ["signature", signature]] as const) if (file) {
       try { validateMemberImage(file); } catch (error) { issues[key] = (error as Error).message; }
     }
@@ -40,7 +39,8 @@ export function MemberForm({ member, onClose, onSaved }: { member: MemberView | 
       const folder = crypto.randomUUID();
       const photoPath = photo ? await uploadMemberImage(photo, folder, "photo") : member?.photo_path ?? "";
       if (photo) uploaded.push(photoPath);
-      const signaturePath = signature ? await uploadMemberImage(signature, folder, "signature") : member?.signature_path ?? "";
+      const signaturePath = member?.signature_path || await uploadMemberImage(new File([await (await fetch("/authorized-signature.png")).blob()], "signature.png", { type: "image/png" }), folder, "signature");
+      if (!member?.signature_path) uploaded.push(signaturePath);
       if (signature) uploaded.push(signaturePath);
       const row = await save({ data: { ...(member ? { id: member.id } : {}), member: parsed.data, photo_path: photoPath, signature_path: signaturePath } });
       savedId = row.id;
@@ -85,7 +85,6 @@ export function MemberForm({ member, onClose, onSaved }: { member: MemberView | 
         <div><Label htmlFor="member-type">Membership Type</Label><select id="member-type" className={`${selectCls} w-full`} value={form.membership_type} onChange={(e) => set("membership_type", e.target.value)}>{membershipTypes.map((v) => <option key={v}>{v}</option>)}</select></div>
         <div><Label htmlFor="member-status">Certificate Status</Label><select id="member-status" className={`${selectCls} w-full capitalize`} value={form.status} onChange={(e) => set("status", e.target.value)}>{memberStatuses.map((v) => <option key={v} value={v}>{v}</option>)}</select></div>
         <div><Label htmlFor="member-photo">Member Photograph (optional){member ? " · replace" : ""}</Label><Input id="member-photo" type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => setPhoto(e.target.files?.[0] ?? null)} />{member?.photo_url && <img src={member.photo_url} alt="Current member photograph" className="mt-2 h-16 w-16 rounded object-contain" />}{errorFor("photo")}</div>
-        <div><Label htmlFor="member-signature">Authorized Signature{member ? " (replace)" : ""}</Label><Input id="member-signature" type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => setSignature(e.target.files?.[0] ?? null)} />{member && <img src={member.signature_url} alt="Current authorized signature" className="mt-2 h-16 w-28 object-contain" />}{errorFor("signature")}</div>
         <div className="sm:col-span-2"><Label htmlFor="member-signatory_name">Authorized Signatory's Name</Label><Input id="member-signatory_name" value={form.signatory_name} readOnly />{errorFor("signatory_name")}</div>
         <div className="sm:col-span-2"><Label htmlFor="member-notes">Membership Notes (optional)</Label><Textarea id="member-notes" maxLength={2000} value={form.notes} onChange={(e) => set("notes", e.target.value)} />{errorFor("notes")}</div>
         {errors['submit'] && <p role="alert" className="text-sm text-destructive sm:col-span-2">{errors['submit']}</p>}
