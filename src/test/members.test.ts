@@ -51,4 +51,12 @@ describe("Member registration", () => {
     expect(() => validateMemberImage(new File(["a"], "file.html", { type: "text/html" }))).toThrow();
     expect(() => validateMemberImage(new File([new Uint8Array(5 * 1024 * 1024 + 1)], "photo.png", { type: "image/png" }))).toThrow();
   });
+});import { appointmentLetterNumbers } from "@/lib/members";
+describe("Appointment letter numbers", () => {
+  it("numbers letters SSW/<year>/0001 in registration order, restarting each year", () => {
+    const n = appointmentLetterNumbers([
+      { id: "b", created_at: "2026-03-01T00:00:00Z" }, { id: "a", created_at: "2026-01-01T00:00:00Z" }, { id: "c", created_at: "2027-01-05T00:00:00Z" },
+    ]);
+    expect(n.get("a")).toBe("SSW/2026/0001"); expect(n.get("b")).toBe("SSW/2026/0002"); expect(n.get("c")).toBe("SSW/2027/0001");
+  });
 });
