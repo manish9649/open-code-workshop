@@ -44,6 +44,10 @@
   --certificate-gold: #b18a3e;
   --certificate-paper: #fff9ed;
   --certificate-muted: #596171;
+  --letter-green: #146c3c;
+  --letter-green-light: #e8f4ec;
+  --letter-ink: #1d2a22;
+  --letter-paper: #ffffff;
   --radius: 0.875rem;
   --forest: oklch(0.36 0.06 160);
   --forest-foreground: oklch(0.985 0.012 85);
