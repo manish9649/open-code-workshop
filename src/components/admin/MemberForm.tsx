@@ -44,7 +44,7 @@ export function MemberForm({ member, onClose, onSaved }: { member: MemberView | 
       const row = await save({ data: { ...(member ? { id: member.id } : {}), member: parsed.data, photo_path: photoPath, signature_path: signaturePath } });
       savedId = row.id;
       if (member) {
-        const oldFiles = [photo ? member.photo_path : "", signature ? member.signature_path : ""].filter(Boolean);
+        const oldFiles = [photo ? member.photo_path : "", signature ? member.signature_path : "", member.certificate_path].filter(Boolean);
         if (oldFiles.length) await supabase.storage.from("members").remove(oldFiles);
       }
       toast.success(member ? "Member updated. Preparing appointment letter…" : "Member registered. Preparing appointment letter…");
