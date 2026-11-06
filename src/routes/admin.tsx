@@ -24,7 +24,7 @@ export const Route = createFileRoute("/admin")({
 });
 
 const nav = [
-  { to: "/admin/members", label: "Members & Certificates", icon: Users },
+  { to: "/admin/members", label: "Members & Appointment Letters", icon: Users },
   { to: "/admin/photos", label: "Photo Gallery", icon: Images },
   { to: "/admin/donations", label: "Donations", icon: IndianRupee },
   { to: "/admin/donation-graph", label: "Donation Graph", icon: BarChart3 },

@@ -11,7 +11,7 @@ export const Route = createFileRoute("/admin/dashboard")({
 });
 
 const tiles = [
-  { to: "/admin/members", label: "Add Member", icon: Users, text: "Members and membership certificates." },
+  { to: "/admin/members", label: "Add Member", icon: Users, text: "Members and appointment letters." },
   { to: "/admin/photos", label: "Photo Gallery", icon: Images, text: "Upload and publish event photos." },
   { to: "/admin/donations", label: "Donations", icon: IndianRupee, text: "Record, search and verify donations." },
   { to: "/admin/donation-graph", label: "Donation Graph", icon: BarChart3, text: "Trends by day, week, month and year." },
