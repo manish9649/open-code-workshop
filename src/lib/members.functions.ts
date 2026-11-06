@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { memberSchema, memberFileSchema, memberPhotoSchema, certificateTimestampSchema } from "@/lib/members";
+import { appointmentLetterNumbers, memberSchema, memberFileSchema, memberPhotoSchema, certificateTimestampSchema } from "@/lib/members";
 import { certificateDetails } from "@/lib/certificate-details";
 
 export const listMembers = createServerFn({ method: "POST" })
@@ -11,6 +11,7 @@ export const listMembers = createServerFn({ method: "POST" })
     if (roleError || !admin) throw new Error("Administrator access required.");
     const { data, error } = await context.supabase.from("members").select("*").order("created_at", { ascending: false });
     if (error) throw new Error("Members could not be loaded. Please try again.");
+    const numbers = appointmentLetterNumbers(data ?? []);
     return await Promise.all((data ?? []).map(async (m) => {
       const signed = async (path: string) => {
         if (!path) return "";
@@ -21,7 +22,7 @@ export const listMembers = createServerFn({ method: "POST" })
       // Return browser-reachable storage addresses, never the server-only base URL.
       const browserUrl = import.meta.env['VITE_SUPABASE_URL'];
       const visible = (url: string) => url.replace(/^https?:\/\/[^/]+/, browserUrl);
-      return { ...m, photo_url: visible(await signed(m.photo_path)), signature_url: visible(await signed(m.signature_path)), certificate_url: m.certificate_path ? visible(await signed(m.certificate_path)) : "" };
+      return { ...m, photo_url: visible(await signed(m.photo_path)), signature_url: visible(await signed(m.signature_path)), certificate_url: m.certificate_path ? visible(await signed(m.certificate_path)) : "", letter_number: numbers.get(m.id) ?? "" };
     }));
   });
 
