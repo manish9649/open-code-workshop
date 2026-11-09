@@ -71,7 +71,7 @@ export async function generateCertificate(member: MemberView) {
   const [presidentUrl, secretaryUrl, sealUrl] = await Promise.all([officeImageUrl("president"), officeImageUrl("secretary"), officeImageUrl("seal")]);
   const [photo, president, secretary, seal] = await Promise.all([
     member.photo_url ? loadImage(member.photo_url) : Promise.resolve(null),
-    optionalImage(presidentUrl || "/authorized-signature.png"), optionalImage(secretaryUrl), optionalImage(sealUrl),
+    optionalImage(presidentUrl), optionalImage(secretaryUrl), optionalImage(sealUrl),
   ]);
   const W = 1240, H = 1754;
   const canvas = document.createElement("canvas"); canvas.width = W; canvas.height = H;
@@ -80,7 +80,8 @@ export async function generateCertificate(member: MemberView) {
   const styles = getComputedStyle(document.documentElement);
   const token = (name: string) => styles.getPropertyValue(name).trim();
   const green = token("--letter-green"), light = token("--letter-green-light"), ink = token("--letter-ink"), paper = token("--letter-paper"), muted = token("--certificate-muted");
-  const serif = 'Georgia, "Times New Roman", serif';
+  const serif = 'Arial, Helvetica, sans-serif';
+  const societyName = "Shiv Seva Welfare Society";
   const font = (size: number, bold = false, italic = false) => `${italic ? "italic " : ""}${bold ? "700" : "400"} ${size}px ${serif}`;
   const text = (value: string, x: number, y: number, size: number, opts: { color?: string; bold?: boolean; italic?: boolean; align?: CanvasTextAlign; max?: number } = {}) => {
     ctx.fillStyle = opts.color ?? ink; ctx.textAlign = opts.align ?? "left";
@@ -105,69 +106,57 @@ export async function generateCertificate(member: MemberView) {
   const fit = (img: ImageBitmap, x: number, y: number, w: number, h: number) => { const r = Math.min(w / img.width, h / img.height); ctx.drawImage(img, x + (w - img.width * r) / 2, y + (h - img.height * r) / 2, img.width * r, img.height * r); };
 
   ctx.fillStyle = paper; ctx.fillRect(0, 0, W, H);
-  ctx.strokeStyle = green; ctx.lineWidth = 8; ctx.strokeRect(28, 28, W - 56, H - 56);
-  ctx.lineWidth = 2; ctx.strokeRect(42, 42, W - 84, H - 84);
-  // Letterhead
-  ctx.fillStyle = light; ctx.fillRect(44, 44, W - 88, 250);
-  ctx.save(); ctx.translate(80, 80); ctx.scale(3.4, 3.4);
-  ctx.fillStyle = green; ctx.beginPath(); ctx.arc(24, 24, 23, 0, 2 * Math.PI); ctx.fill();
-  ctx.fillStyle = token("--saffron"); ctx.fill(new Path2D("M24 12c3 4 4 7 0 11-4-4-3-7 0-11z"));
-  ctx.fillStyle = paper; ctx.fill(new Path2D("M12 26c3 0 6 2 8 5l4 4 4-4c2-3 5-5 8-5-1 6-6 11-12 11s-11-5-12-11z")); ctx.restore();
-  const head = certificateDetails.societyName.toUpperCase().split(" ");
-  text(head.slice(0, 2).join(" "), 700, 125, 58, { color: green, bold: true, align: "center", max: 860 });
-  text(head.slice(2).join(" "), 700, 182, 42, { color: green, bold: true, align: "center", max: 860 });
-  text("SERVICE | HUMANITY | SOCIAL WELFARE", 700, 222, 20, { color: ink, italic: true, align: "center" });
-  text(`Registered Office: ${site.address}`, W / 2, 256, 17, { align: "center", max: W - 140 });
-  text(`Registration No.: ${certificateDetails.registrationNumber}     Contact: ${site.phone}  ·  ${site.email}`, W / 2, 282, 17, { align: "center", max: W - 140 });
-  line(44, 296, W - 44, 296, green, 5);
-  // Title
-  text("APPOINTMENT LETTER", W / 2, 368, 40, { color: green, bold: true, align: "center" });
-  ctx.font = font(40, true); const tw = ctx.measureText("APPOINTMENT LETTER").width; line(W / 2 - tw / 2, 380, W / 2 + tw / 2, 380, green, 3);
+  // Match the uploaded white letterhead: no logo, coloured panel or outer frame.
+  text("SHIV SEVA", W / 2, 105, 50, { color: green, bold: true, align: "center" });
+  text("WELFARE SOCIETY", W / 2, 154, 32, { align: "center" });
+  text("SERVICE | HUMANITY | SOCIAL WELFARE", W / 2, 186, 17, { color: muted, italic: true, align: "center" });
+  text("Registered Office: ________________________________________", W / 2, 222, 18, { align: "center" });
+  text("Registration No.: _________________    Contact: _________________", W / 2, 256, 18, { align: "center" });
+  line(50, 310, W - 50, 310, green, 5);
+  text("APPOINTMENT LETTER", W / 2, 358, 35, { color: green, align: "center" });
   // Addressee block + photo
-  const L = 90, R = W - 90;
-  let y = 450;
-  const field = (label: string, value: string, maxW = 760) => { ctx.font = font(23, true); text(label, L, y, 23, { bold: true }); const lw = ctx.measureText(label).width; text(value, L + lw + 10, y, 23, { max: maxW - lw - 10 }); y += 46; };
+  const L = 53, R = W - 53;
+  let y = 414;
+  const field = (label: string, value: string, maxW = 760) => { ctx.font = font(23, true); text(label, L, y, 23, { bold: true }); const lw = ctx.measureText(label).width; text(value, L + lw + 10, y, 23, { max: maxW - lw - 10 }); y += 39; };
   field("Letter No.:", member.letter_number);
   field("Date:", indianDate(member.created_at));
-  text("To,", L, y, 23); y += 46;
+  text("To,", L, y, 23); y += 39;
   field("Mr./Ms.", member.full_name);
   field("Father's / Husband's Name:", member.father_name);
   ctx.font = font(23, true); text("Address:", L, y, 23, { bold: true });
   y = paragraph([[member.address, false]], L + ctx.measureText("Address:").width + 10, y, 760 - 110, 23, 34) + 12;
-  const px = R - 200, py = 420;
-  ctx.strokeStyle = green; ctx.lineWidth = 3; ctx.strokeRect(px, py, 200, 240);
-  if (photo) fit(photo, px + 6, py + 6, 188, 228);
-  else { text("PASTE", px + 100, py + 105, 20, { color: muted, align: "center", bold: true }); text("PHOTO HERE", px + 100, py + 135, 20, { color: muted, align: "center", bold: true }); }
-  y = Math.max(y, py + 290);
+  const px = R - 230, py = 397;
+  ctx.strokeStyle = green; ctx.lineWidth = 3; ctx.strokeRect(px, py, 215, 215);
+  if (photo) fit(photo, px + 6, py + 6, 203, 203);
+  else { text("PASTE", px + 107, py + 88, 19, { color: muted, align: "center" }); text("PHOTO", px + 107, py + 115, 19, { color: muted, align: "center" }); text("HERE", px + 107, py + 142, 19, { color: muted, align: "center" }); }
+  y = Math.max(y, py + 235);
   const designation = member.membership_type;
-  y = paragraph([["Subject: ", true], [`Appointment as ${designation} of ${certificateDetails.societyName}`, false]], L, y, R - L, 23, 36) + 14;
-  y = paragraph([[`Dear Mr./Ms. ${member.full_name},`, false]], L, y, R - L, 23, 36) + 10;
-  y = paragraph([[`We are pleased to appoint you as ${designation} (Designation) of `, false], [certificateDetails.societyName, true], [`, with effect from ${indianDate(member.joining_date)}, subject to the rules and regulations of the Society.`, false]], L, y, R - L, 23, 36) + 14;
-  y = paragraph([["Your key responsibilities will include:", true]], L, y, R - L, 23, 36);
+  y = paragraph([["Subject: ", true], [`Appointment as ${designation} of ${societyName}`, false]], L, y, R - L, 21, 29) + 12;
+  y = paragraph([[`Dear Mr./Ms. ${member.full_name},`, false]], L, y, R - L, 21, 29) + 12;
+  y = paragraph([[`We are pleased to appoint you as ${designation} (Designation) of `, false], [societyName, true], [`, with effect from ${indianDate(member.joining_date)}, subject to the rules and regulations of the Society.`, false]], L, y, R - L, 21, 29) + 12;
+  y = paragraph([["Your key responsibilities will include:", true]], L, y, R - L, 21, 29);
   const duties = ["Participating in social welfare, charitable and community development activities.", "Supporting the Society's programmes related to education, health and public welfare.", "Promoting the aims and objectives of the Society in a responsible manner.", "Following the Society's rules, maintaining discipline and protecting its reputation."];
-  duties.forEach((d, i) => { text(`${i + 1}.`, L + 20, y, 22); y = paragraph([[d, false]], L + 55, y, R - L - 55, 22, 33); });
-  y = paragraph([["We look forward to your sincere contribution and commitment towards the objectives of the Society. We welcome you and wish you success in this role.", false]], L, y + 10, R - L, 23, 36) + 8;
-  text("For ", L, y, 23, { italic: true }); ctx.font = font(23, false, true); text(certificateDetails.societyName.toUpperCase(), L + ctx.measureText("For ").width, y, 23, { italic: true, bold: true });
-  // Signature table
-  const ty = Math.max(y + 24, 1250), th = 230, cw = (R - L) / 3;
-  ctx.fillStyle = light; ctx.fillRect(L, ty, R - L, 44);
-  ctx.strokeStyle = green; ctx.lineWidth = 2; ctx.strokeRect(L, ty, R - L, th); line(L, ty + 44, R, ty + 44); line(L + cw, ty, L + cw, ty + th); line(L + 2 * cw, ty, L + 2 * cw, ty + th);
-  ["President", "Secretary", "Society Seal / Stamp"].forEach((h, i) => text(h, L + cw * i + cw / 2, ty + 30, 22, { color: green, bold: true, align: "center" }));
-  const sigCell = (i: number, name: string, img: ImageBitmap | null) => {
-    const x = L + cw * i + 16;
-    text(`Name: ${name || "____________________"}`, x, ty + 84, 19, { max: cw - 32 });
-    if (img) fit(img, x, ty + 100, cw - 32, 90);
-    text("Signature: ", x, ty + 210, 19); line(x + 95, ty + 212, x + cw - 32, ty + 212, ink, 1);
-  };
-  sigCell(0, certificateDetails.presidentName, president); sigCell(1, certificateDetails.secretaryName, secretary);
-  if (seal) fit(seal, L + 2 * cw + 20, ty + 56, cw - 40, th - 68);
-  // Member's acceptance
-  let ay = ty + th + 60;
-  text("MEMBER'S ACCEPTANCE", W / 2, ay, 28, { color: green, bold: true, align: "center" });
-  ctx.font = font(28, true); const aw = ctx.measureText("MEMBER'S ACCEPTANCE").width; line(W / 2 - aw / 2, ay + 10, W / 2 + aw / 2, ay + 10, green, 2);
-  ay = paragraph([["I accept this appointment and agree to abide by the Society's rules and regulations.", false]], L, ay + 52, R - L, 22, 34) + 30;
-  text("Member's Signature:", L, ay, 22); line(L + 210, ay + 3, L + 560, ay + 3, ink, 1);
-  text("Date:", R - 330, ay, 22); text("___ / ___ / ______", R - 260, ay, 22);
+  duties.forEach((d, i) => { text(`${i + 1}.`, L + 20, y, 22); y = paragraph([[d, false]], L + 55, y, R - L - 55, 21, 30); });
+  y = paragraph([["We look forward to your sincere contribution and commitment towards the objectives of the Society. We welcome you and wish you success in this role.", false]], L, y + 10, R - L, 21, 29) + 14;
+  text("For ", L, y, 23, { italic: true }); ctx.font = font(23, false, true); text(societyName.toUpperCase(), L + ctx.measureText("For ").width, y, 23, { italic: true, bold: true });
+  // Three empty image boxes followed by the role, name and signature lines.
+  const tx = L + 40, tr = R - 40, ty = y + 25, th = 86, cw = (tr - tx) / 3;
+  ctx.strokeStyle = token("--letter-rule"); ctx.lineWidth = 2; ctx.strokeRect(tx, ty, tr - tx, th);
+  line(tx + cw, ty, tx + cw, ty + th, token("--letter-rule"));
+  line(tx + 2 * cw, ty, tx + 2 * cw, ty + th, token("--letter-rule"));
+  [president, secretary, seal].forEach((img, i) => { if (img) fit(img, tx + cw * i + 8, ty + 6, cw - 16, th - 12); });
+  ["President", "Secretary", "Society Seal / Stamp"].forEach((h, i) => text(h, tx + cw * i + cw / 2, ty + th + 20, 20, { align: "center" }));
+  [0, 1].forEach((i) => {
+    const x = tx + cw * i + 62;
+    text("Name: __________________", x, ty + th + 57, 20);
+    text("Signature: _______________", x, ty + th + 82, 20);
+  });
+  let ay = ty + th + 122;
+  text("MEMBER'S ACCEPTANCE", L, ay, 23, { color: green });
+  ay = paragraph([["I accept this appointment and agree to abide by the Society's rules and regulations.", false]], L, ay + 37, R - L, 21, 30) + 8;
+  text("Member's Signature: _______________________", L, ay, 21);
+  text("Date: ____ / ____ / ______", L + 470, ay, 21);
+  text("SHIV SEVA WELFARE SOCIETY | Official Document", W / 2, H - 58, 14, { color: token("--letter-footer"), align: "center" });
   photo?.close(); president?.close(); secretary?.close(); seal?.close();
   const preview = canvas.toDataURL("image/png");
   const { PDFDocument } = await import("pdf-lib");
@@ -199,5 +188,5 @@ export async function shareCertificate(blob: Blob, member: MemberView) {
 /** Short, readable form of the certificate number for printing (QR keeps the full number). */
 export function shortCertificateNumber(number: string) {
   const m = /^SSWS-([0-9A-F]{8})/i.exec(number);
-  return m ? `SSWS-${m[1]!.toUpperCase()}` : number;
+  return m?.[1] ? `SSWS-${m[1].toUpperCase()}` : number;
 }
