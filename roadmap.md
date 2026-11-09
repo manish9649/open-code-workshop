@@ -8,5 +8,6 @@
 - [x] Admin account set up for shivseva1707@gmail.com.
 - [x] Add secure member registration, unique certificates, search, editing and deletion.
 - [x] Verify membership certificate downloads and mobile/desktop admin workflows.
-- [ ] Update official certificate design, details and QR verification; verify PDF and mobile/desktop flows.
-- [ ] Match the uploaded Appointment Letter screenshot exactly; remove the preset Rakesh name and signature.
+- [x] Match the uploaded Appointment Letter screenshot and remove the preset Rakesh name and signature; visually verify the generated PDF.
+- [ ] Verify issuing and retrieving a letter with a real admin session — original website's external account session is unavailable.
+- [ ] Persist non-reusable sequential appointment numbers — requires access to the original website's database; current numbers are calculated from member ordering.
