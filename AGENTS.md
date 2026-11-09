@@ -28,3 +28,5 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+- Keep appointment-letter rendering in the existing member document module, using its design version to replace outdated saved PDFs without adding a second admin feature.

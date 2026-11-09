@@ -3,9 +3,9 @@ export const certificateDetails = {
   registrationNumber: "HR/06-008-2026-01707",
   uniqueIdentificationNumber: "2000168677",
   signatoryName: "Rakesh Kumar",
-  presidentName: "Rakesh Kumar",
+  presidentName: "",
   secretaryName: "",
-  designVersion: 3,
+  designVersion: 4,
   verificationOrigin: "https://open-path-explorer.lovable.app",
 } as const;
 
