@@ -9,3 +9,4 @@
 - [x] Add secure member registration, unique certificates, search, editing and deletion.
 - [x] Verify membership certificate downloads and mobile/desktop admin workflows.
 - [ ] Update official certificate design, details and QR verification; verify PDF and mobile/desktop flows.
+- [ ] Match the uploaded Appointment Letter screenshot exactly; remove the preset Rakesh name and signature.
