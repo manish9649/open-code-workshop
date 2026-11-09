@@ -53,6 +53,9 @@ describe("Member registration", () => {
   });
 });import { appointmentLetterNumbers } from "@/lib/members";
 describe("Appointment letter numbers", () => {
+  it("leaves the President's name blank instead of presetting Rakesh", () => {
+    expect(certificateDetails.presidentName).toBe("");
+  });
   it("numbers letters SSW/<year>/0001 in registration order, restarting each year", () => {
     const n = appointmentLetterNumbers([
       { id: "b", created_at: "2026-03-01T00:00:00Z" }, { id: "a", created_at: "2026-01-01T00:00:00Z" }, { id: "c", created_at: "2027-01-05T00:00:00Z" },

@@ -42,7 +42,7 @@ export function MemberCertificate({ member, onClose, onStored }: { member: Membe
   }, [member.id, attempt]);
   return <Dialog open onOpenChange={(open) => { if (!open) onClose(); }}><DialogContent className="max-h-[90dvh] max-w-4xl overflow-y-auto rounded-lg">
     <DialogTitle>Appointment Letter</DialogTitle><DialogDescription className="break-all">Letter No. {member.letter_number} · {member.status.toUpperCase()}</DialogDescription>
-    {error ? <div role="alert" className="text-destructive"><p>{error}</p><Button variant="outline" className="mt-3" onClick={() => setAttempt((v) => v + 1)}><RefreshCw />Retry</Button></div> : !result ? <p className="py-12 text-center text-muted-foreground">Preparing certificate…</p> : <>
+    {error ? <div role="alert" className="text-destructive"><p>{error}</p><Button variant="outline" className="mt-3" onClick={() => setAttempt((v) => v + 1)}><RefreshCw />Retry</Button></div> : !result ? <p className="py-12 text-center text-muted-foreground">Preparing appointment letter…</p> : <>
       <img src={result.preview} alt={`Appointment letter for ${member.full_name}`} className="mx-auto w-full max-w-2xl border" />
       <div className="flex flex-wrap gap-2">
         <Button variant="saffron" onClick={() => downloadCertificate(result.blob, letterFileName(member))}><Download />Download PDF</Button>
