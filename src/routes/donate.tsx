@@ -1,166 +1,81 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { AnimatePresence, motion } from "framer-motion";
-import { AlertCircle, ChevronDown, FileText, Lock, ShieldCheck } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Banknote, Heart, Info, QrCode, SquarePen } from "lucide-react";
 import { useState, type FormEvent } from "react";
-import food from "@/assets/food.webp";
-import { PageHero, Reveal } from "@/components/site/Motion";
 import { Button } from "@/components/ui/button";
-import { donationCauseOptions } from "@/lib/causes";
+import phonePe from "@/assets/donation-phonepe.jpeg.asset.json";
+import { site } from "@/lib/site";
 
 export const Route = createFileRoute("/donate")({
   head: () => ({
     meta: [
+      { title: "Donate — Shiv Sewa Welfare Society" },
+      { name: "description", content: "Support Shiv Sewa Welfare Society through the supplied PhonePe payment QR code." },
+      { property: "og:title", content: "Donate to Shiv Sewa Welfare Society" },
+      { property: "og:description", content: "Support our cause with a contribution using the supplied PhonePe QR code." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { title: "Donate — Shiv Sewa Welfare Society" },
-      { name: "description", content: "Support education, food and essential needs, and community welfare with a donation to Shiv Sewa Welfare Society." },
-      { property: "og:title", content: "Donate to Shiv Sewa Welfare Society" },
-      { property: "og:description", content: "Your kindness can change a life." },
     ],
   }),
   component: Donate,
 });
 
-const presets = [251, 501, 1001, 2501];
-const faqs = [
-  { q: "How can I donate?", a: "Choose an amount and cause using the form on this page. Online payments will open once our secure payment provider is configured. Until then, please reach out through our Contact page." },
-  { q: "How will my contribution be used?", a: "Contributions are directed to the cause you select, or to where the need is greatest if you choose the General Fund. We are committed to keeping clear records of how funds are used." },
-  { q: "Can I receive a donation receipt?", a: "Receipt availability and the donation process will be confirmed before online payments open." },
-  { q: "Which payment methods are supported?", a: "Payment methods will be announced once a secure payment provider has been configured." },
-];
-
-const inr = (n: number) => "₹" + n.toLocaleString("en-IN");
+const inputClass = "mt-1.5 block h-10 w-full min-w-0 rounded-sm border border-donation-border bg-donation-paper px-3 text-sm text-donation-ink outline-none placeholder:text-donation-muted focus:border-donation-accent focus:ring-1 focus:ring-donation-accent file:mr-3 file:border-0 file:border-r file:border-donation-border file:bg-donation-surface file:px-2 file:py-2 file:text-donation-muted";
+const labelClass = "block text-xs font-medium text-donation-muted";
 
 function Donate() {
-  const [amount, setAmount] = useState<number | null>(501);
-  const [custom, setCustom] = useState("");
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [status, setStatus] = useState<"idle" | "loading" | "unavailable">("idle");
-  const [open, setOpen] = useState<number | null>(0);
-
-  const finalAmount = custom ? Number(custom) : amount ?? 0;
-
-  function submit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const f = new FormData(e.currentTarget);
-    const errs: Record<string, string> = {};
-    const name = String(f.get("name") || "").trim();
-    const email = String(f.get("email") || "").trim();
-    const phone = String(f.get("phone") || "").trim();
-    if (name.length < 2) errs["name"] = "Please enter your full name.";
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errs["email"] = "Please enter a valid email address.";
-    if (phone && !/^[+\d\s-]{8,15}$/.test(phone)) errs["phone"] = "Please enter a valid phone number.";
-    if (!Number.isFinite(finalAmount) || finalAmount < 10 || finalAmount > 1000000) errs["amount"] = "Please enter an amount between ₹10 and ₹10,00,000.";
-    if (!f.get("cause")) errs["cause"] = "Please select a cause.";
-    if (!f.get("consent")) errs["consent"] = "Please accept the terms to continue.";
-    setErrors(errs);
-    if (Object.keys(errs).length) return;
-    setStatus("unavailable");
+  const [notSent, setNotSent] = useState(false);
+  function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setNotSent(true);
   }
 
-  const err = (k: string) => errors[k] && <p id={`${k}-error`} role="alert" className="mt-1 text-sm text-destructive">{errors[k]}</p>;
-  const fieldA11y = (k: string) => ({ "aria-invalid": Boolean(errors[k]), "aria-describedby": errors[k] ? `${k}-error` : undefined });
-  const input = "mt-1.5 w-full rounded-xl border bg-background px-4 py-3 outline-none transition focus:border-saffron focus:ring-2 focus:ring-ring/40";
-
   return (
-    <>
-      <PageHero eyebrow="Donate" title="Your Kindness Can Change a Life." text="Every contribution matters. Support Shiv Sewa Welfare Society in creating meaningful opportunities and helping communities in need." image={food} />
-
-      <section className="mx-auto grid max-w-7xl gap-10 px-6 py-20 lg:grid-cols-[1.3fr_1fr]">
-        <Reveal>
-          <form onSubmit={submit} noValidate className="rounded-[2rem] bg-card p-8 shadow-soft md:p-10">
-            <h2 className="text-2xl font-extrabold text-forest">Make a Donation</h2>
-            <p className="mt-3 flex gap-2 text-sm text-muted-foreground"><AlertCircle className="h-5 w-5 shrink-0 text-saffron" />Online donations are awaiting setup. No payment can be taken yet.</p>
-            <fieldset className="mt-6">
-              <legend className="font-semibold">Choose an amount</legend>
-              <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                {presets.map((p) => {
-                  const active = !custom && amount === p;
-                  return (
-                    <Button variant="outline" type="button" key={p} aria-pressed={active}
-                      onClick={() => { setAmount(p); setCustom(""); }}
-                      className={`h-auto rounded-xl border-2 py-3 font-display text-lg font-extrabold transition-colors ${active ? "border-saffron bg-saffron text-saffron-foreground" : "border-border hover:border-saffron"}`}>
-                      {inr(p)}
-                    </Button>
-                  );
-                })}
-              </div>
-              <label className="mt-4 block text-sm font-semibold" htmlFor="custom">Or enter a custom amount (₹)</label>
-              <input id="custom" {...fieldA11y("custom")} inputMode="numeric" value={custom} placeholder="e.g. 750"
-                onChange={(e) => setCustom(e.target.value.replace(/\D/g, ""))} className={input} />
-              {err("amount")}
-            </fieldset>
-
-            <div className="mt-6 grid gap-5 sm:grid-cols-2">
-              <div><label htmlFor="name" className="text-sm font-semibold">Full name *</label><input id="name" {...fieldA11y("name")} name="name" maxLength={100} className={input} />{err("name")}</div>
-              <div><label htmlFor="email" className="text-sm font-semibold">Email address *</label><input id="email" {...fieldA11y("email")} name="email" type="email" maxLength={255} className={input} />{err("email")}</div>
-              <div><label htmlFor="phone" className="text-sm font-semibold">Phone number (optional)</label><input id="phone" {...fieldA11y("phone")} name="phone" type="tel" maxLength={15} className={input} />{err("phone")}</div>
-              <div>
-                <label htmlFor="cause" className="text-sm font-semibold">Select a cause *</label>
-                <select id="cause" {...fieldA11y("cause")} name="cause" defaultValue="" className={input}>
-                  <option value="" disabled>Choose…</option>
-                  {donationCauseOptions.map((c) => <option key={c}>{c}</option>)}
-                </select>{err("cause")}
-              </div>
-            </div>
-
-            <label className="mt-6 flex items-start gap-3 text-sm">
-              <input type="checkbox" name="consent" className="mt-1 h-4 w-4 accent-[var(--forest)]" />
-              <span>I agree to the privacy and donation terms described on this page and consent to my details being used to process my donation.</span>
-            </label>
-            {err("consent")}
-
-            <AnimatePresence>
-              {status === "unavailable" && (
-                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
-                  role="alert" className="mt-6 flex gap-3 rounded-xl border border-saffron bg-secondary p-4 text-sm">
-                  <AlertCircle className="h-5 w-5 shrink-0 text-saffron" />
-                  <span><strong>Live donations are not enabled yet.</strong> Thank you for your generosity — no payment has been taken. Please check back soon or contact us to contribute.</span>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            <Button variant="saffron" type="submit" disabled={status === "loading"} className="mt-6 h-auto w-full whitespace-normal text-lg disabled:opacity-70">
-              <Lock className="h-4 w-4" /> {status === "loading" ? "Please wait…" : `Continue to Payment${finalAmount ? " · " + inr(finalAmount) : ""}`}
-            </Button>
-          </form>
-        </Reveal>
-
-        <div className="space-y-6">
-          <Reveal delay={0.1}>
-            <div className="rounded-[2rem] bg-forest p-8 text-forest-foreground">
-              <ShieldCheck className="h-9 w-9 text-saffron" />
-              <h3 className="mt-4 text-xl font-extrabold">Trust & Transparency</h3>
-              <ul className="mt-4 space-y-3 text-sm opacity-90">
-                <li><strong className="text-saffron">Responsible management:</strong> donations are directed to the cause you choose.</li>
-                <li><strong className="text-saffron">Privacy:</strong> your details are used only to process your donation and never sold.</li>
-                <li><strong className="text-saffron">Clear records:</strong> we are committed to accountable use of every rupee.</li>
-              </ul>
-            </div>
-          </Reveal>
-          <Reveal delay={0.2}>
-            <div className="rounded-[2rem] border bg-card p-8">
-              <h3 className="flex items-center gap-2 text-xl font-extrabold text-forest"><FileText className="h-5 w-5 text-saffron" /> FAQs</h3>
-              <div className="mt-4 divide-y">
-                {faqs.map((f, i) => (
-                  <div key={f.q}>
-                    <Button variant="ghost" className="flex h-auto w-full whitespace-normal items-center justify-between py-4 text-left font-semibold" aria-expanded={open === i} onClick={() => setOpen(open === i ? null : i)}>
-                      {f.q}
-                      <motion.span animate={{ rotate: open === i ? 180 : 0 }}><ChevronDown className="h-5 w-5 text-saffron" /></motion.span>
-                    </Button>
-                    <AnimatePresence initial={false}>
-                      {open === i && (
-                        <motion.p initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
-                          className="overflow-hidden pb-4 text-sm text-muted-foreground">{f.a}</motion.p>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </Reveal>
+    <section className="bg-donation-paper px-5 py-12 text-donation-ink md:py-16">
+      <div className="mx-auto grid max-w-5xl items-start gap-8 md:grid-cols-2 md:gap-10">
+        <div>
+          <span className="inline-flex items-center gap-1 rounded-full bg-donation-accent px-3 py-1 text-xs font-semibold text-donation-accent-foreground"><Banknote className="h-3 w-3" /> Payment Information</span>
+          <h1 className="mt-3 text-2xl font-extrabold">Support Our Cause</h1>
+          <p className="mt-3 text-sm leading-relaxed text-donation-muted">Your generous contribution helps us make a lasting impact in our community. Every donation counts!</p>
+          <div className="mt-5 rounded-sm bg-donation-surface p-5">
+            <h2 className="flex items-center gap-2 text-sm font-bold text-donation-accent"><Banknote className="h-4 w-4" /> Bank Account Details:</h2>
+            <p className="mt-3 text-xs leading-relaxed text-donation-muted">For bank transfer details, please contact {site.name}.</p>
+            <a href={`tel:${site.phone.replace(/\s/g, "")}`} className="mt-2 inline-block text-sm font-semibold text-donation-ink underline underline-offset-4">{site.phone}</a>
+          </div>
+          <div className="mt-4 rounded-sm p-5 text-center shadow-donation">
+            <h2 className="flex items-center justify-center gap-1.5 text-sm font-bold"><QrCode className="h-4 w-4" /> Scan QR Code to Pay</h2>
+            <img src={phonePe.url} alt="PhonePe payment QR code for Manish Gour" className="mx-auto mt-4 h-auto w-full max-w-64 rounded-sm border border-donation-accent" />
+            <p className="mt-3 text-xs text-donation-muted">Payment recipient: <strong className="text-donation-ink">Manish Gour</strong></p>
+            <p className="mt-2 flex items-center justify-center gap-1 text-xs text-donation-muted"><Info className="h-3 w-3 shrink-0" /> Scan with any UPI app to donate.</p>
+          </div>
         </div>
-      </section>
-    </>
+
+        <form onSubmit={submit} className="min-w-0 rounded-sm bg-donation-paper p-6 shadow-donation md:p-7">
+          <h2 className="mb-5 flex items-center gap-2 text-lg font-bold text-donation-accent"><SquarePen className="h-5 w-5" /> Donation Form</h2>
+          <div className="space-y-4">
+            <label className={labelClass}>Full Name *<input name="name" autoComplete="name" required placeholder="Enter your full name" className={inputClass} /></label>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <label className={labelClass}>Email *<input name="email" type="email" autoComplete="email" required placeholder="your@email.com" className={inputClass} /></label>
+              <label className={labelClass}>Phone Number *<input name="phone" type="tel" autoComplete="tel" required placeholder="10-digit mobile" className={inputClass} /></label>
+            </div>
+            <label className={labelClass}>Donation Amount (₹) *<input name="amount" type="number" step="any" required placeholder="Enter amount" className={inputClass} /></label>
+            <label className={labelClass}>Transaction ID *<input name="transaction" required placeholder="Enter UPI/Bank transaction ID" className={inputClass} /></label>
+            <div>
+              <label className={labelClass}>Payment Screenshot *<input name="paymentScreenshot" type="file" accept="image/*" required className={`${inputClass} bg-donation-surface px-0`} /></label>
+              <p className="mt-1 flex items-center gap-1 text-[10px] text-donation-muted"><Info className="h-3 w-3" /> Upload screenshot of payment confirmation</p>
+            </div>
+            <label className={labelClass}>ID Card Type *<select name="idType" required defaultValue="" className={inputClass}><option value="" disabled>Select ID Card Type</option><option>Aadhaar Card</option><option>PAN Card</option><option>Voter ID</option><option>Driving Licence</option><option>Passport</option></select></label>
+            <label className={labelClass}>ID Card Number *<input name="idNumber" required placeholder="Enter ID card number" className={inputClass} /></label>
+            <div>
+              <label className={labelClass}>ID Card Image *<input name="idImage" type="file" accept="image/*" required className={`${inputClass} bg-donation-surface px-0`} /></label>
+              <p className="mt-1 flex items-center gap-1 text-[10px] text-donation-muted"><Info className="h-3 w-3" /> Upload clear photo of your ID card</p>
+            </div>
+            <label className={labelClass}>Message (Optional)<textarea name="message" placeholder="Share your thoughts or message…" rows={3} className={`${inputClass} h-auto py-2`} /></label>
+          </div>
+          <p className="mt-4 text-xs leading-relaxed text-donation-muted">Online submission is not available yet. To confirm your donation, <Link to="/contact" className="font-semibold underline underline-offset-2">contact the society</Link>. Documents entered here are not uploaded or saved.</p>
+          {notSent && <p role="alert" className="mt-3 rounded-sm border border-donation-accent p-3 text-sm">Your form has not been sent. Please contact the society to confirm your payment; do not send ID documents until requested.</p>}
+          <Button type="submit" className="mt-4 h-11 w-full rounded-sm bg-donation-accent text-donation-accent-foreground shadow-donation hover:bg-donation-accent/90"><Heart className="h-4 w-4" /> Submit Donation</Button>
+        </form>
+      </div>
+    </section>
   );
 }
