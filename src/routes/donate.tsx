@@ -30,7 +30,7 @@ function Donate() {
   }
 
   return (
-    <section className="bg-donation-paper px-5 py-12 text-donation-ink md:py-16">
+    <section className="bg-donation-paper px-5 pb-12 pt-28 text-donation-ink md:pb-16 md:pt-32">
       <div className="mx-auto grid max-w-5xl items-start gap-8 md:grid-cols-2 md:gap-10">
         <div>
           <span className="inline-flex items-center gap-1 rounded-full bg-donation-accent px-3 py-1 text-xs font-semibold text-donation-accent-foreground"><Banknote className="h-3 w-3" /> Payment Information</span>
