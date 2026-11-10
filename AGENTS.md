@@ -31,3 +31,4 @@ use the editor.
 
 - Keep appointment-letter rendering in the existing member document module, using its design version to replace outdated saved PDFs without adding a second admin feature.
 - Keep the manual-QR donation presentation in the existing donation route; do not claim form submissions are saved until a delivery service is connected.
+- QR donation confirmations open a validated email draft; never treat an opened draft as a sent message or verified payment.

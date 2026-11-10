@@ -1,6 +1,8 @@
 // Edit organization details here. Leave empty strings until verified.
 export const site = {
   name: "Shiv Sewa Welfare Society",
+  registrationCountry: "IN",
+  donationMethod: "phonepe_qr",
   tagline: "Seva Hi Sankalp, Samaj Hi Parivaar.",
   taglineEn: "Service Is Our Commitment, Society Is Our Family.",
   email: "shivseva1707@gmail.com",

@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Banknote, Heart, Info, QrCode, SquarePen } from "lucide-react";
+import { Banknote, Mail, Info, QrCode, SquarePen } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import phonePe from "@/assets/donation-phonepe.jpeg.asset.json";
 import { site } from "@/lib/site";
+import { donationConfirmationEmail } from "@/lib/donation-confirmation";
 
 export const Route = createFileRoute("/donate")({
   head: () => ({
@@ -24,9 +25,17 @@ const labelClass = "block text-xs font-medium text-donation-muted";
 
 function Donate() {
   const [notSent, setNotSent] = useState(false);
+  const [error, setError] = useState("");
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setNotSent(true);
+    setError("");
+    try {
+      const data = Object.fromEntries(new FormData(event.currentTarget));
+      window.location.href = donationConfirmationEmail(data);
+      setNotSent(true);
+    } catch {
+      setError("Please enter valid contact details, a positive donation amount, and your transaction ID.");
+    }
   }
 
   return (
@@ -52,28 +61,19 @@ function Donate() {
         <form onSubmit={submit} className="min-w-0 rounded-sm bg-donation-paper p-6 shadow-donation md:p-7">
           <h2 className="mb-5 flex items-center gap-2 text-lg font-bold text-donation-accent"><SquarePen className="h-5 w-5" /> Donation Form</h2>
           <div className="space-y-4">
-            <label className={labelClass}>Full Name *<input name="name" autoComplete="name" required placeholder="Enter your full name" className={inputClass} /></label>
+            <label className={labelClass}>Full Name *<input name="name" autoComplete="name" minLength={2} maxLength={100} required placeholder="Enter your full name" className={inputClass} /></label>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <label className={labelClass}>Email *<input name="email" type="email" autoComplete="email" required placeholder="your@email.com" className={inputClass} /></label>
-              <label className={labelClass}>Phone Number *<input name="phone" type="tel" autoComplete="tel" required placeholder="10-digit mobile" className={inputClass} /></label>
+              <label className={labelClass}>Email *<input name="email" type="email" autoComplete="email" maxLength={255} required placeholder="your@email.com" className={inputClass} /></label>
+              <label className={labelClass}>Phone Number *<input name="phone" type="tel" autoComplete="tel" minLength={7} maxLength={20} required placeholder="10-digit mobile" className={inputClass} /></label>
             </div>
-            <label className={labelClass}>Donation Amount (₹) *<input name="amount" type="number" step="any" required placeholder="Enter amount" className={inputClass} /></label>
-            <label className={labelClass}>Transaction ID *<input name="transaction" required placeholder="Enter UPI/Bank transaction ID" className={inputClass} /></label>
-            <div>
-              <label className={labelClass}>Payment Screenshot *<input name="paymentScreenshot" type="file" accept="image/*" required className={`${inputClass} bg-donation-surface px-0`} /></label>
-              <p className="mt-1 flex items-center gap-1 text-[10px] text-donation-muted"><Info className="h-3 w-3" /> Upload screenshot of payment confirmation</p>
-            </div>
-            <label className={labelClass}>ID Card Type *<select name="idType" required defaultValue="" className={inputClass}><option value="" disabled>Select ID Card Type</option><option>Aadhaar Card</option><option>PAN Card</option><option>Voter ID</option><option>Driving Licence</option><option>Passport</option></select></label>
-            <label className={labelClass}>ID Card Number *<input name="idNumber" required placeholder="Enter ID card number" className={inputClass} /></label>
-            <div>
-              <label className={labelClass}>ID Card Image *<input name="idImage" type="file" accept="image/*" required className={`${inputClass} bg-donation-surface px-0`} /></label>
-              <p className="mt-1 flex items-center gap-1 text-[10px] text-donation-muted"><Info className="h-3 w-3" /> Upload clear photo of your ID card</p>
-            </div>
-            <label className={labelClass}>Message (Optional)<textarea name="message" placeholder="Share your thoughts or message…" rows={3} className={`${inputClass} h-auto py-2`} /></label>
+            <label className={labelClass}>Donation Amount (₹) *<input name="amount" type="number" min="0.01" step="0.01" required placeholder="Enter amount" className={inputClass} /></label>
+            <label className={labelClass}>Transaction ID *<input name="transaction" maxLength={100} required placeholder="Enter UPI/Bank transaction ID" className={inputClass} /></label>
+            <label className={labelClass}>Message (Optional)<textarea name="message" maxLength={2000} placeholder="Share your thoughts or message…" rows={3} className={`${inputClass} h-auto py-2`} /></label>
           </div>
-          <p className="mt-4 text-xs leading-relaxed text-donation-muted">Online submission is not available yet. To confirm your donation, <Link to="/contact" className="font-semibold underline underline-offset-2">contact the society</Link>. Documents entered here are not uploaded or saved.</p>
-          {notSent && <p role="alert" className="mt-3 rounded-sm border border-donation-accent p-3 text-sm">Your form has not been sent. Please contact the society to confirm your payment; do not send ID documents until requested.</p>}
-          <Button type="submit" className="mt-4 h-11 w-full rounded-sm bg-donation-accent text-donation-accent-foreground shadow-donation hover:bg-donation-accent/90"><Heart className="h-4 w-4" /> Submit Donation</Button>
+          <p className="mt-4 text-xs leading-relaxed text-donation-muted">Payment confirmation is subject to review by the society. No payment or donor details are saved automatically. <Link to="/contact" className="font-semibold underline underline-offset-2">Contact the society</Link> if needed.</p>
+          {error && <p role="alert" className="mt-3 text-sm text-destructive">{error}</p>}
+          {notSent && <p role="status" className="mt-3 rounded-sm border border-donation-accent p-3 text-sm">An email draft was requested, not sent. Send it from your email app and attach your payment screenshot if needed. If no email app opened, contact {site.email}. Do not send ID documents.</p>}
+          <Button type="submit" className="mt-4 h-11 w-full rounded-sm bg-donation-accent text-donation-accent-foreground shadow-donation hover:bg-donation-accent/90"><Mail className="h-4 w-4" /> Email Payment Details</Button>
         </form>
       </div>
     </section>
