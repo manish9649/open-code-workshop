@@ -1,4 +1,5 @@
 # Website completion
+- [x] Restore the reference donation form appearance with payment screenshot and optional local-only ID fields, retaining the existing QR and email draft flow.
 - [x] Set registration country to India and activate QR donation confirmation through email; automatic saving and verification remain unavailable.
 - [x] Add Kawar Yatra Seva, Grow Trees, and Clothes Distribution to Home and Our Causes with images and animated details.
 - [x] Verify new cause links, donation choices, and mobile/desktop layouts.
