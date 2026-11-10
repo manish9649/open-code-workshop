@@ -37,9 +37,24 @@
   --color-forest: var(--forest);
   --color-forest-foreground: var(--forest-foreground);
   --color-cream: var(--cream);
+  --color-donation-accent: var(--donation-accent);
+  --color-donation-accent-foreground: var(--donation-accent-foreground);
+  --color-donation-paper: var(--donation-paper);
+  --color-donation-ink: var(--donation-ink);
+  --color-donation-muted: var(--donation-muted);
+  --color-donation-surface: var(--donation-surface);
+  --color-donation-border: var(--donation-border);
 }
 
 :root {
+  --donation-accent: #ff7800;
+  --donation-accent-foreground: #ffffff;
+  --donation-paper: #ffffff;
+  --donation-ink: #092532;
+  --donation-muted: #637182;
+  --donation-surface: #f7f7f8;
+  --donation-border: #c6ced7;
+  --shadow-donation: 0 6px 22px #09253218;
   --certificate-navy: #182a45;
   --certificate-gold: #b18a3e;
   --certificate-paper: #fff9ed;
@@ -114,6 +129,7 @@
   &:active { transform: scale(.97); }
 }
 @utility shadow-soft { box-shadow: var(--shadow-soft); }
+@utility shadow-donation { box-shadow: var(--shadow-donation); }
 @utility mandala-bg {
   background-image:
     radial-gradient(circle at 1px 1px, color-mix(in oklab, var(--saffron) 35%, transparent) 1px, transparent 0);
