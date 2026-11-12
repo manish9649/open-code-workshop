@@ -1,11 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Banknote, Heart, Info, QrCode, SquarePen } from "lucide-react";
 import { useState, type FormEvent } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import phonePe from "@/assets/donation-phonepe.jpeg.asset.json";
 import { site } from "@/lib/site";
-import { donationConfirmationEmail } from "@/lib/donation-confirmation";
+import { donationSubmissionSchema, receiptMessage, screenshotLimit, screenshotType } from "@/lib/donation-submission";
+import { submitDonation } from "@/lib/donation-submission.functions";
 
 export const Route = createFileRoute("/donate")({
   head: () => ({
@@ -25,17 +27,37 @@ const inputClass = "mt-1.5 block h-10 w-full min-w-0 rounded-sm border border-do
 const labelClass = "block text-xs font-medium text-donation-muted";
 
 function Donate() {
-  const [notSent, setNotSent] = useState(false);
+  const [reference, setReference] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [submissionKey, setSubmissionKey] = useState("");
+  const save = useServerFn(submitDonation);
   const [error, setError] = useState("");
-  function submit(event: FormEvent<HTMLFormElement>) {
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (busy || reference) return;
     setError("");
+    setBusy(true);
     try {
-      const data = Object.fromEntries(new FormData(event.currentTarget));
-      window.location.href = donationConfirmationEmail(data);
-      setNotSent(true);
-    } catch {
-      setError("Please enter valid contact details, a positive donation amount, and your transaction ID.");
+      const form = new FormData(event.currentTarget);
+      const key = submissionKey || crypto.randomUUID();
+      setSubmissionKey(key);
+      const parsed = donationSubmissionSchema.safeParse({ ...Object.fromEntries(form), submissionKey: key });
+      if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? "Check your donation details.");
+      const file = form.get("paymentScreenshot");
+      if (!(file instanceof File) || !file.size || file.size > screenshotLimit) throw new Error("Choose a payment screenshot up to 5 MB.");
+      screenshotType(new Uint8Array(await file.arrayBuffer()));
+      const screenshot = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result).split(",")[1] ?? "");
+        reader.onerror = () => reject(new Error("Could not read the screenshot. Please select it again."));
+        reader.readAsDataURL(file);
+      });
+      const saved = await save({ data: { details: parsed.data, screenshot } });
+      setReference(saved.reference);
+    } catch (failure) {
+      setError(failure instanceof Error ? failure.message : "Donation submission failed. Please try again.");
+    } finally {
+      setBusy(false);
     }
   }
 
@@ -69,7 +91,7 @@ function Donate() {
             </div>
             <label className={labelClass}>Donation Amount (₹) *<input name="amount" type="number" min="0.01" step="0.01" required placeholder="Enter amount" className={inputClass} /></label>
             <label className={labelClass}>Transaction ID *<input name="transaction" maxLength={100} required placeholder="Enter UPI/Bank transaction ID" className={inputClass} /></label>
-             <label className={labelClass}>Payment Screenshot *<input name="paymentScreenshot" type="file" accept="image/*" required className={`${inputClass} bg-donation-surface px-0`} /><span className="mt-1 flex items-center gap-1 text-[10px]"><Info className="h-3 w-3" /> Attach this screenshot yourself when sending the email.</span></label>
+             <label className={labelClass}>Payment Screenshot *<input name="paymentScreenshot" type="file" accept="image/png,image/jpeg,image/webp" required className={`${inputClass} bg-donation-surface px-0`} /><span className="mt-1 flex items-center gap-1 text-[10px]"><Info className="h-3 w-3" /> PNG, JPEG, or WebP · Up to 5 MB · Private to authorized admins.</span></label>
              <div className={labelClass}>
                <label htmlFor="donation-id-type">ID Card Type (Optional)</label>
                <Select name="idCardType">
@@ -81,10 +103,10 @@ function Donate() {
              <label className={labelClass}>ID Card Image (Optional)<input name="idCardImage" type="file" accept="image/*" className={`${inputClass} bg-donation-surface px-0`} /><span className="mt-1 flex items-center gap-1 text-[10px]"><Info className="h-3 w-3" /> ID details stay on this page and are not sent or saved.</span></label>
             <label className={labelClass}>Message (Optional)<textarea name="message" maxLength={2000} placeholder="Share your thoughts or message…" rows={3} className={`${inputClass} h-auto py-2`} /></label>
           </div>
-          <p className="mt-4 text-xs leading-relaxed text-donation-muted">Payment confirmation is subject to review by the society. No payment or donor details are saved automatically. <Link to="/contact" className="font-semibold underline underline-offset-2">Contact the society</Link> if needed.</p>
+          <p className="mt-4 text-xs leading-relaxed text-donation-muted">Payment confirmation is subject to review by the society. Never share PINs, passwords, or OTPs. <Link to="/contact" className="font-semibold underline underline-offset-2">Contact the society</Link> if needed.</p>
           {error && <p role="alert" className="mt-3 text-sm text-destructive">{error}</p>}
-           {notSent && <p role="status" className="mt-3 rounded-sm border border-donation-accent p-3 text-sm">An email draft was requested, not sent. Your selected files are not attached automatically. Attach your payment screenshot and send it from your email app. If no email app opened, contact {site.email}. Do not send ID documents.</p>}
-           <Button type="submit" className="mt-4 h-11 w-full rounded-sm bg-donation-accent text-donation-accent-foreground shadow-donation hover:bg-donation-accent/90"><Heart className="h-4 w-4 fill-current" /> Submit Donation</Button>
+           {reference && <div role="status" className="mt-3 rounded-sm border border-donation-accent p-3 text-sm"><p>{receiptMessage}</p><p className="mt-2 break-all font-semibold">Donation Reference Number: {reference}</p></div>}
+           <Button type="submit" disabled={busy || Boolean(reference)} className="mt-4 h-11 w-full rounded-sm bg-donation-accent text-donation-accent-foreground shadow-donation hover:bg-donation-accent/90"><Heart className="h-4 w-4 fill-current" />{busy ? "Submitting…" : reference ? "Submitted — Awaiting Verification" : "Submit Donation"}</Button>
         </form>
       </div>
     </section>

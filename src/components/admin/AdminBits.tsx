@@ -5,7 +5,7 @@ export function StatCard({ label, value }: { label: string; value: ReactNode }) 
   return <div className="rounded-xl border bg-card p-4"><p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{label}</p><p className="mt-1 text-2xl font-extrabold text-forest">{value}</p></div>;
 }
 export function StatusBadge({ s }: { s: DonationStatus }) {
-  const cls = { verified: "bg-forest text-primary-foreground", pending: "bg-saffron text-saffron-foreground", failed: "bg-destructive text-destructive-foreground", refunded: "bg-muted text-foreground" }[s];
+  const cls = { verified: "bg-forest text-primary-foreground", pending: "bg-saffron text-saffron-foreground", rejected: "bg-destructive text-destructive-foreground", failed: "bg-destructive text-destructive-foreground", refunded: "bg-muted text-foreground" }[s];
   return <span className={`rounded-full px-2 py-0.5 text-xs font-bold capitalize ${cls}`}>{s}</span>;
 }
 export function PageTitle({ title, sub, children }: { title: string; sub?: string; children?: ReactNode }) {

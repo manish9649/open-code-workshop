@@ -31,5 +31,5 @@ use the editor.
 
 - Keep appointment-letter rendering in the existing member document module, using its design version to replace outdated saved PDFs without adding a second admin feature.
 - Keep the manual-QR donation presentation in the existing donation route; do not claim form submissions are saved until a delivery service is connected.
-- QR donation confirmations open a validated email draft; never treat an opened draft as a sent message or verified payment.
-- Donation file selections remain browser-local and identity fields are excluded from email drafts, avoiding collection of sensitive documents without a delivery service.
+- QR donation submissions use a validated server function, private screenshot storage, database uniqueness for retries and UTRs, and pending status; show confirmation only after saving, because uploads do not verify payments.
+- Optional donation identity fields remain browser-local and are excluded from submissions to avoid collecting unnecessary sensitive documents.
