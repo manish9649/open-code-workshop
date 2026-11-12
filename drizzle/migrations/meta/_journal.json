@@ -36,6 +36,13 @@
       "when": 1793850464662,
       "tag": "0004_certificate_verification",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1794456499567,
+      "tag": "0005_secure_donation_submissions",
+      "breakpoints": true
     }
   ]
 }
