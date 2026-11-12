@@ -1,10 +1,10 @@
-export type DonationStatus = "pending" | "verified" | "failed" | "refunded";
+export type DonationStatus = "pending" | "verified" | "rejected" | "failed" | "refunded";
 export type Donation = {
   id: string; donor_name: string; email: string; phone: string; amount: number; cause: string;
   payment_method: string; transaction_ref: string; status: DonationStatus; verified_at: string | null;
-  notes: string; created_at: string;
+  notes: string; created_at: string; reference_number?: string; screenshot_path?: string | null;
 };
-export const STATUSES: DonationStatus[] = ["verified", "pending", "failed", "refunded"];
+export const STATUSES: DonationStatus[] = ["verified", "pending", "rejected", "failed", "refunded"];
 export const METHODS = ["bank_transfer", "upi", "cash", "cheque", "online"];
 export const methodLabel = (m: string) => ({ bank_transfer: "Bank transfer", upi: "UPI", cash: "Cash", cheque: "Cheque", online: "Online" }[m] ?? m);
 
@@ -75,8 +75,10 @@ export function groupTotals(list: Donation[], key: (d: Donation) => string) {
 
 export function toCSV(rows: Record<string, unknown>[]) {
   if (!rows.length) return "";
-  const cols = Object.keys(rows[0]!);
-  const esc = (v: unknown) => { const s = v == null ? "" : String(v); return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
+  const first = rows[0];
+  if (!first) return "";
+  const cols = Object.keys(first);
+  const esc = (v: unknown) => { const raw = v == null ? "" : String(v); const s = /^[\s]*[=+@-]/.test(raw) ? `'${raw}` : raw; return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
   return [cols.join(","), ...rows.map((r) => cols.map((c) => esc(r[c])).join(","))].join("\n");
 }
 export function downloadCSV(name: string, rows: Record<string, unknown>[]) {
@@ -84,6 +86,6 @@ export function downloadCSV(name: string, rows: Record<string, unknown>[]) {
   const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; a.click(); URL.revokeObjectURL(a.href);
 }
 export const donationRow = (d: Donation) => ({
-  id: d.id, date: d.created_at, donor_name: d.donor_name, email: d.email, phone: d.phone, amount_inr: d.amount,
+  id: d.id, reference_number: d.reference_number ?? d.id, date: d.created_at, donor_name: d.donor_name, email: d.email, phone: d.phone, amount_inr: d.amount,
   cause: d.cause, payment_method: methodLabel(d.payment_method), transaction_ref: d.transaction_ref, status: d.status, verified_at: d.verified_at ?? "",
 });

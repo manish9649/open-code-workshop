@@ -52,7 +52,10 @@ export type Database = {
           notes: string
           payment_method: string
           phone: string
+          reference_number: string
+          screenshot_path: string | null
           status: Database["public"]["Enums"]["donation_status"]
+          submission_key: string | null
           transaction_ref: string
           verified_at: string | null
           verified_by: string | null
@@ -67,7 +70,10 @@ export type Database = {
           notes?: string
           payment_method?: string
           phone?: string
+          reference_number?: string
+          screenshot_path?: string | null
           status?: Database["public"]["Enums"]["donation_status"]
+          submission_key?: string | null
           transaction_ref?: string
           verified_at?: string | null
           verified_by?: string | null
@@ -82,7 +88,10 @@ export type Database = {
           notes?: string
           payment_method?: string
           phone?: string
+          reference_number?: string
+          screenshot_path?: string | null
           status?: Database["public"]["Enums"]["donation_status"]
+          submission_key?: string | null
           transaction_ref?: string
           verified_at?: string | null
           verified_by?: string | null
@@ -320,7 +329,12 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
-      donation_status: "pending" | "verified" | "failed" | "refunded"
+      donation_status:
+        | "pending"
+        | "verified"
+        | "failed"
+        | "refunded"
+        | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -449,7 +463,13 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "user"],
-      donation_status: ["pending", "verified", "failed", "refunded"],
+      donation_status: [
+        "pending",
+        "verified",
+        "failed",
+        "refunded",
+        "rejected",
+      ],
     },
   },
 } as const
