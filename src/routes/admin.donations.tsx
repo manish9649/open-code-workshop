@@ -65,9 +65,9 @@ function DonationsPage() {
         <div className="overflow-x-auto rounded-xl border bg-card">
           <table className="w-full text-sm">
             <thead className="bg-secondary text-left"><tr>{["ID", "Donor", "Email", "Phone", "Amount", "Cause", "Method", "Txn / UTR", "Status", "Date"].map((h) => <th key={h} className="whitespace-nowrap px-3 py-2">{h}</th>)}</tr></thead>
-            <tbody>{list.map((d) => (
+            <tbody>{list.map((d, i) => (
               <tr key={d.id} onClick={() => setOpen(d)} className="cursor-pointer border-t hover:bg-secondary/50">
-                <td className="px-3 py-2 font-mono text-xs"><Button size="sm" variant="link" onClick={(e) => { e.stopPropagation(); setOpen(d); }} className="h-auto whitespace-normal break-all p-0 text-left font-mono text-xs">{d.reference_number ?? d.id.slice(0, 8)}</Button></td><td className="px-3 py-2 font-semibold">{d.donor_name}</td><td className="px-3 py-2">{d.email}</td><td className="px-3 py-2">{d.phone}</td>
+                <td className="whitespace-nowrap px-3 py-2 font-mono text-xs"><Button size="sm" variant="link" onClick={(e) => { e.stopPropagation(); setOpen(d); }} className="h-auto p-0 font-mono text-xs">{i + 1}</Button></td><td className="px-3 py-2 font-semibold">{d.donor_name}</td><td className="px-3 py-2">{d.email}</td><td className="px-3 py-2">{d.phone}</td>
                 <td className="px-3 py-2 font-semibold">{inr(d.amount)}</td><td className="px-3 py-2">{d.cause}</td><td className="px-3 py-2">{methodLabel(d.payment_method)}</td><td className="px-3 py-2 font-mono text-xs">{d.transaction_ref}</td>
                 <td className="px-3 py-2"><StatusBadge s={d.status} /></td><td className="whitespace-nowrap px-3 py-2">{dt(d.created_at)}</td>
               </tr>))}</tbody>
