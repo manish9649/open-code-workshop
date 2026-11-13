@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Download, Plus, X } from "lucide-react";
-import { useMemo, useState, type FormEvent } from "react";
+import { Download, Plus, X, Image } from "lucide-react";
+import { useMemo, useState, type FormEvent, type ReactNode, Fragment } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { donationScreenshot } from "@/lib/donation-submission.functions";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { donationsQuery } from "@/lib/admin-data";
@@ -13,7 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Empty, PageTitle, selectCls, StatusBadge } from "@/components/admin/AdminBits";
 
 export const Route = createFileRoute("/admin/donations")({
-  head: () => ({ meta: [{ title: "Donations | Admin" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "Donation Management | Shiv Sewa Welfare Society" }, { name: "description", content: "Private donation review, screenshot access, verification and reports for Shiv Sewa Welfare Society." }, { property: "og:title", content: "Donation Management | Shiv Sewa Welfare Society" }, { property: "og:description", content: "Authorized donation management and payment review." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }, { name: "robots", content: "noindex" }] }),
   component: DonationsPage,
 });
 
@@ -29,7 +31,7 @@ function DonationsPage() {
 
   const list = useMemo(() => (q.data ?? []).filter((d) => {
     const s = search.trim().toLowerCase();
-    if (s && ![d.donor_name, d.email, d.transaction_ref].some((x) => x.toLowerCase().includes(s))) return false;
+    if (s && ![d.donor_name, d.email, d.phone, d.transaction_ref, d.reference_number ?? ""].some((x) => x.toLowerCase().includes(s))) return false;
     if (status && d.status !== status) return false;
     if (cause && d.cause !== cause) return false;
     const day = d.created_at.slice(0, 10);
@@ -41,18 +43,18 @@ function DonationsPage() {
 
   return (
     <div>
-      <PageTitle title="Donations" sub="Only verified payments count as confirmed donations.">
+      <PageTitle title="Donation Management" sub="Only verified payments count as confirmed donations.">
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => downloadCSV("donations.csv", list.map(donationRow))}><Download />Export CSV</Button>
           <Button variant="saffron" onClick={() => setAdding(true)}><Plus />Record donation</Button>
         </div>
       </PageTitle>
       <div className="mb-4 flex flex-wrap gap-2">
-        <button type="button" onClick={() => setStatus("")} className={`rounded-full border px-3 py-1 text-sm ${!status ? "border-forest bg-secondary font-bold" : ""}`}>All ({q.data?.length ?? 0})</button>
-        {STATUSES.map((s) => <button key={s} type="button" onClick={() => setStatus(s)} className={`rounded-full border px-3 py-1 text-sm capitalize ${status === s ? "border-forest bg-secondary font-bold" : ""}`}>{s} ({counts[s]})</button>)}
+        <Button size="sm" variant={!status ? "secondary" : "outline"} onClick={() => setStatus("")}>All ({q.data?.length ?? 0})</Button>
+        {STATUSES.map((s) => <Button key={s} size="sm" variant={status === s ? "secondary" : "outline"} onClick={() => setStatus(s)} className="capitalize">{s} ({counts[s]})</Button>)}
       </div>
       <div className="mb-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-        <Input placeholder="Search name, email or transaction ID" value={search} onChange={(e) => setSearch(e.target.value)} aria-label="Search" />
+        <Input placeholder="Search name, mobile, UTR or reference" value={search} onChange={(e) => setSearch(e.target.value)} aria-label="Search" />
         <select className={selectCls} value={cause} onChange={(e) => setCause(e.target.value)} aria-label="Cause"><option value="">All causes</option>{donationCauseOptions.map((c) => <option key={c}>{c}</option>)}</select>
         <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} aria-label="From date" />
         <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} aria-label="To date" />
@@ -65,7 +67,7 @@ function DonationsPage() {
             <thead className="bg-secondary text-left"><tr>{["ID", "Donor", "Email", "Phone", "Amount", "Cause", "Method", "Txn / UTR", "Status", "Date"].map((h) => <th key={h} className="whitespace-nowrap px-3 py-2">{h}</th>)}</tr></thead>
             <tbody>{list.map((d) => (
               <tr key={d.id} onClick={() => setOpen(d)} className="cursor-pointer border-t hover:bg-secondary/50">
-                <td className="px-3 py-2 font-mono text-xs">{d.id.slice(0, 8)}</td><td className="px-3 py-2 font-semibold">{d.donor_name}</td><td className="px-3 py-2">{d.email}</td><td className="px-3 py-2">{d.phone}</td>
+                <td className="px-3 py-2 font-mono text-xs"><Button size="sm" variant="link" onClick={(e) => { e.stopPropagation(); setOpen(d); }} className="h-auto whitespace-normal break-all p-0 text-left font-mono text-xs">{d.reference_number ?? d.id.slice(0, 8)}</Button></td><td className="px-3 py-2 font-semibold">{d.donor_name}</td><td className="px-3 py-2">{d.email}</td><td className="px-3 py-2">{d.phone}</td>
                 <td className="px-3 py-2 font-semibold">{inr(d.amount)}</td><td className="px-3 py-2">{d.cause}</td><td className="px-3 py-2">{methodLabel(d.payment_method)}</td><td className="px-3 py-2 font-mono text-xs">{d.transaction_ref}</td>
                 <td className="px-3 py-2"><StatusBadge s={d.status} /></td><td className="whitespace-nowrap px-3 py-2">{dt(d.created_at)}</td>
               </tr>))}</tbody>
@@ -78,11 +80,11 @@ function DonationsPage() {
   );
 }
 
-function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
+function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 p-4" onClick={onClose}>
       <div role="dialog" aria-label={title} className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl bg-card p-6" onClick={(e) => e.stopPropagation()}>
-        <div className="mb-4 flex items-center justify-between"><h3 className="text-lg font-bold text-forest">{title}</h3><button type="button" aria-label="Close" onClick={onClose}><X className="h-5 w-5" /></button></div>
+        <div className="mb-4 flex items-center justify-between"><h3 className="text-lg font-bold text-forest">{title}</h3><Button size="icon" variant="ghost" aria-label="Close" onClick={onClose}><X className="h-5 w-5" /></Button></div>
         {children}
       </div>
     </div>
@@ -91,18 +93,38 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
 
 function Details({ d, onClose }: { d: Donation; onClose: () => void }) {
   const qc = useQueryClient();
-  async function setStatus(status: DonationStatus) {
-    if (status === "verified" && !confirm("Only verify after confirming the money arrived in your bank account. Continue?")) return;
-    const { data: { user } } = await supabase.auth.getUser();
-    const { error } = await supabase.from("donations").update({ status, verified_at: status === "verified" ? new Date().toISOString() : null, verified_by: status === "verified" ? user?.id ?? null : null }).eq("id", d.id);
-    if (error) toast.error(error.message); else { toast.success(`Marked as ${status}`); qc.invalidateQueries({ queryKey: ["admin", "donations"] }); }
+  const screenshot = useServerFn(donationScreenshot);
+  const [imageUrl, setImageUrl] = useState("");
+  const [busy, setBusy] = useState(false);
+  async function openScreenshot(download = false) {
+    setBusy(true);
+    try {
+      const result = await screenshot({ data: { id: d.id, download } });
+      if (download) { const a = document.createElement("a"); a.href = result.url; a.download = "payment-screenshot"; a.click(); }
+      else setImageUrl(result.url);
+    } catch { toast.error("Could not load the payment screenshot. Please try again."); }
+    finally { setBusy(false); }
   }
-  const rows: [string, React.ReactNode][] = [["Donation ID", <span className="font-mono text-xs">{d.id}</span>], ["Donor", d.donor_name], ["Email", d.email || "—"], ["Phone", d.phone || "—"], ["Amount", inr(d.amount)], ["Cause", d.cause], ["Payment method", methodLabel(d.payment_method)], ["Transaction / UTR", d.transaction_ref || "—"], ["Status", <StatusBadge s={d.status} />], ["Received", dt(d.created_at)], ["Verified at", d.verified_at ? dt(d.verified_at) : "—"], ["Notes", d.notes || "—"]];
+  async function setStatus(status: DonationStatus) {
+    if (busy) return;
+    if (status === "verified" && !confirm("Only verify after confirming the money arrived in your bank account. Continue?")) return;
+    setBusy(true);
+    try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("Sign in again to update this donation.");
+    const { data: saved, error } = await supabase.from("donations").update({ status, verified_at: status === "verified" ? new Date().toISOString() : null, verified_by: status === "verified" ? user.id : null }).eq("id", d.id).select("id,status").single();
+    if (error || !saved) throw new Error("Donation status could not be saved.");
+    toast.success(`Marked as ${saved.status}`); await qc.invalidateQueries({ queryKey: ["admin", "donations"] });
+    } catch (error) { toast.error(error instanceof Error ? error.message : "Could not update the donation."); }
+    finally { setBusy(false); }
+  }
+  const rows: [string, ReactNode][] = [["Donation Reference", <span className="font-mono text-xs">{d.reference_number ?? d.id}</span>], ["Donor", d.donor_name], ["Email", d.email || "—"], ["Phone", d.phone || "—"], ["Amount", inr(d.amount)], ["Cause", d.cause], ["Payment method", methodLabel(d.payment_method)], ["Transaction / UTR", d.transaction_ref || "—"], ["Status", <StatusBadge s={d.status} />], ["Received", dt(d.created_at)], ["Verified at", d.verified_at ? dt(d.verified_at) : "—"], ["Notes", d.notes || "—"]];
   return (
     <Modal title="Donation details" onClose={onClose}>
-      <dl className="grid grid-cols-[140px_1fr] gap-y-2 text-sm">{rows.map(([k, v]) => <><dt key={k} className="text-muted-foreground">{k}</dt><dd>{v}</dd></>)}</dl>
+      <dl className="grid grid-cols-[120px_minmax(0,1fr)] gap-x-2 gap-y-2 text-sm">{rows.map(([k, v]) => <Fragment key={k}><dt className="text-muted-foreground">{k}</dt><dd className="break-words">{v}</dd></Fragment>)}</dl>
+      {d.screenshot_path && <div className="mt-4"><div className="flex flex-wrap gap-2"><Button variant="outline" disabled={busy} onClick={() => openScreenshot()}><Image />View screenshot</Button><Button variant="outline" disabled={busy} onClick={() => openScreenshot(true)}><Download />Download screenshot</Button></div>{imageUrl && <img src={imageUrl} alt="Uploaded payment screenshot" className="mt-3 h-auto max-h-96 w-full object-contain" />}</div>}
       <div className="mt-5 flex flex-wrap gap-2">
-        {STATUSES.filter((s) => s !== d.status).map((s) => <Button key={s} size="sm" variant={s === "verified" ? "saffron" : "outline"} onClick={() => setStatus(s)} className="capitalize">Mark {s}</Button>)}
+        {STATUSES.filter((s) => s !== d.status).map((s) => <Button key={s} disabled={busy} size="sm" variant={s === "verified" ? "saffron" : "outline"} onClick={() => setStatus(s)} className="capitalize">Mark {s}</Button>)}
       </div>
     </Modal>
   );
