@@ -7,9 +7,10 @@ import { dt, donationRow, downloadCSV, groupTotals, inr, methodLabel, timeSeries
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Empty, PageTitle, StatusBadge } from "@/components/admin/AdminBits";
+import { adminHead } from "@/lib/admin-head";
 
 export const Route = createFileRoute("/admin/reports")({
-  head: () => ({ meta: [{ title: "Donation Reports | Admin" }, { name: "robots", content: "noindex" }] }),
+  head: () => adminHead("Donation Reports", "Private donor reports, history and payment verification exports."),
   component: ReportsPage,
 });
 

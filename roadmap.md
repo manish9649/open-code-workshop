@@ -1,5 +1,7 @@
 # Website completion
-- [ ] Replace donation email drafts with saved submissions, private screenshot uploads, duplicate prevention, reference numbers, and existing-admin review/search/reporting — blocked by unavailable access to the original website’s database and storage; connecting it must preserve existing accounts and records.
+- [x] Replace donation email drafts with Cloud-backed saved submissions, private screenshot uploads, duplicate prevention, reference numbers, and admin review/search/reporting; verify public saving and duplicate rejection.
+- [ ] Verify admin screenshot viewing/downloads and verification end-to-end — Cloud has no administrator account yet; original accounts and records have not been migrated.
+- [ ] Migrate original website accounts, records, and stored files to Cloud — original service access is unavailable; no original data was deleted.
 - [x] Restore the reference donation form appearance with payment screenshot and optional local-only ID fields, retaining the existing QR and email draft flow.
 - [x] Set registration country to India and activate QR donation confirmation through email; automatic saving and verification remain unavailable.
 - [x] Add Kawar Yatra Seva, Grow Trees, and Clothes Distribution to Home and Our Causes with images and animated details.

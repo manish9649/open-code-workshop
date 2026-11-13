@@ -33,3 +33,4 @@ use the editor.
 - Keep the manual-QR donation presentation in the existing donation route; do not claim form submissions are saved until a delivery service is connected.
 - QR donation submissions use a validated server function, private screenshot storage, database uniqueness for retries and UTRs, and pending status; show confirmation only after saving, because uploads do not verify payments.
 - Optional donation identity fields remain browser-local and are excluded from submissions to avoid collecting unnecessary sensitive documents.
+- Keep private administration page metadata in the shared admin-head helper to provide distinct titles and no-index metadata consistently.

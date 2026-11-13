@@ -6,9 +6,10 @@ import { donationsQuery } from "@/lib/admin-data";
 import { groupTotals, inRange, inr, methodLabel, rangeBounds, summary, timeSeries, type Period, type RangeKey } from "@/lib/donations";
 import { Input } from "@/components/ui/input";
 import { Empty, PageTitle, selectCls, StatCard } from "@/components/admin/AdminBits";
+import { adminHead } from "@/lib/admin-head";
 
 export const Route = createFileRoute("/admin/donation-graph")({
-  head: () => ({ meta: [{ title: "Donation Graph | Admin" }, { name: "robots", content: "noindex" }] }),
+  head: () => adminHead("Donation Graph", "Private donation trends and verified payment summaries."),
   component: GraphPage,
 });
 

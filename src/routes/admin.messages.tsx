@@ -2,9 +2,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Empty, PageTitle } from "@/components/admin/AdminBits";
+import { adminHead } from "@/lib/admin-head";
 
 export const Route = createFileRoute("/admin/messages")({
-  head: () => ({ meta: [{ title: "Contact Messages | Admin" }, { name: "robots", content: "noindex" }] }),
+  head: () => adminHead("Contact Messages", "Private messages received by Shiv Sewa Welfare Society."),
   component: MessagesPage,
 });
 
