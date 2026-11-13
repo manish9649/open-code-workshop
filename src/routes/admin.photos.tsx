@@ -10,9 +10,10 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { coverOf, fetchAlbums, fetchCategories, GALLERY_BUCKET, type GalleryAlbum } from "@/lib/gallery";
+import { adminHead } from "@/lib/admin-head";
 
 export const Route = createFileRoute("/admin/photos")({
-  head: () => ({ meta: [{ title: "Photo Gallery | Admin" }, { name: "robots", content: "noindex" }] }),
+  head: () => adminHead("Gallery Administration", "Private society photo and event album management."),
   component: Dashboard,
 });
 

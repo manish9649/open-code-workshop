@@ -4,9 +4,10 @@ import { BarChart3, FileText, Images, IndianRupee, Users } from "lucide-react";
 import { donationsQuery } from "@/lib/admin-data";
 import { inr, summary } from "@/lib/donations";
 import { PageTitle, StatCard } from "@/components/admin/AdminBits";
+import { adminHead } from "@/lib/admin-head";
 
 export const Route = createFileRoute("/admin/dashboard")({
-  head: () => ({ meta: [{ title: "Overview | Admin" }, { name: "robots", content: "noindex" }] }),
+  head: () => adminHead("Administrator Overview", "Private society administration and verified donation totals."),
   component: Overview,
 });
 
