@@ -52,10 +52,15 @@ export type Database = {
           notes: string
           payment_method: string
           phone: string
+          receipt_email_sent_at: string | null
+          receipt_email_status: string | null
+          receipt_number: string | null
+          receipt_path: string | null
           reference_number: string
           screenshot_path: string | null
           status: Database["public"]["Enums"]["donation_status"]
           submission_key: string | null
+          thank_you_path: string | null
           transaction_ref: string
           verified_at: string | null
           verified_by: string | null
@@ -70,10 +75,15 @@ export type Database = {
           notes?: string
           payment_method?: string
           phone?: string
+          receipt_email_sent_at?: string | null
+          receipt_email_status?: string | null
+          receipt_number?: string | null
+          receipt_path?: string | null
           reference_number?: string
           screenshot_path?: string | null
           status?: Database["public"]["Enums"]["donation_status"]
           submission_key?: string | null
+          thank_you_path?: string | null
           transaction_ref?: string
           verified_at?: string | null
           verified_by?: string | null
@@ -88,10 +98,15 @@ export type Database = {
           notes?: string
           payment_method?: string
           phone?: string
+          receipt_email_sent_at?: string | null
+          receipt_email_status?: string | null
+          receipt_number?: string | null
+          receipt_path?: string | null
           reference_number?: string
           screenshot_path?: string | null
           status?: Database["public"]["Enums"]["donation_status"]
           submission_key?: string | null
+          thank_you_path?: string | null
           transaction_ref?: string
           verified_at?: string | null
           verified_by?: string | null
@@ -309,6 +324,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      assign_donation_receipt: {
+        Args: { donation_id: string }
+        Returns: string
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
