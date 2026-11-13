@@ -43,6 +43,13 @@
       "when": 1794456499567,
       "tag": "0005_secure_donation_submissions",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794554933646,
+      "tag": "0006_donation_receipts",
+      "breakpoints": true
     }
   ]
 }
