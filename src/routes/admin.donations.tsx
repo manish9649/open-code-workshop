@@ -4,6 +4,8 @@ import { Download, Plus, X, Image } from "lucide-react";
 import { useMemo, useState, type FormEvent, type ReactNode, Fragment } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { donationScreenshot } from "@/lib/donation-submission.functions";
+import { donationDocumentUrl, saveDonationDocuments, sendDonationReceiptEmail } from "@/lib/donation-receipts.functions";
+import { blobToBase64, generateDonationReceipt, generateThankYouLetter } from "@/lib/donation-receipt";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { donationsQuery } from "@/lib/admin-data";
@@ -114,8 +116,36 @@ function Details({ d, onClose }: { d: Donation; onClose: () => void }) {
     if (!user) throw new Error("Sign in again to update this donation.");
     const { data: saved, error } = await supabase.from("donations").update({ status, verified_at: status === "verified" ? new Date().toISOString() : null, verified_by: status === "verified" ? user.id : null }).eq("id", d.id).select("id,status").single();
     if (error || !saved) throw new Error("Donation status could not be saved.");
-    toast.success(`Marked as ${saved.status}`); await qc.invalidateQueries({ queryKey: ["admin", "donations"] });
+    toast.success(`Marked as ${saved.status}`);
+    if (status === "verified") await prepareReceipt(true);
+    await qc.invalidateQueries({ queryKey: ["admin", "donations"] });
     } catch (error) { toast.error(error instanceof Error ? error.message : "Could not update the donation."); }
+    finally { setBusy(false); }
+  }
+  const saveDocs = useServerFn(saveDonationDocuments);
+  const sendEmail = useServerFn(sendDonationReceiptEmail);
+  const docUrl = useServerFn(donationDocumentUrl);
+  /** Generates the receipt + thank-you PDFs, stores them, and emails the donor. */
+  async function prepareReceipt(email = false) {
+    const [receiptBlob, letterBlob] = await Promise.all([generateDonationReceipt(d, d.receipt_number ?? ""), generateThankYouLetter(d)]);
+    const [receipt, thankYou] = await Promise.all([blobToBase64(receiptBlob), blobToBase64(letterBlob)]);
+    const { receiptNumber } = await saveDocs({ data: { id: d.id, receipt, thankYou } });
+    toast.success(`Receipt ${receiptNumber} created.`);
+    if (email) await resendEmail();
+  }
+  async function resendEmail() {
+    const result = await sendEmail({ data: { id: d.id } });
+    if (result.sent) toast.success("Receipt email sent to the donor.");
+    else toast.info("Receipt saved. Email sending needs a sender domain — set it up, then use Resend email.");
+    await qc.invalidateQueries({ queryKey: ["admin", "donations"] });
+  }
+  async function openDocument(kind: "receipt" | "thankYou", download = false) {
+    setBusy(true);
+    try {
+      const result = await docUrl({ data: { id: d.id, kind, download } });
+      if (download) { const a = document.createElement("a"); a.href = result.url; a.download = kind === "receipt" ? "donation-receipt" : "thank-you-letter"; a.click(); }
+      else window.open(result.url, "_blank", "noopener");
+    } catch (error) { toast.error(error instanceof Error ? error.message : "Could not open the document."); }
     finally { setBusy(false); }
   }
   const rows: [string, ReactNode][] = [["Donation Reference", <span className="font-mono text-xs">{d.reference_number ?? d.id}</span>], ["Donor", d.donor_name], ["Email", d.email || "—"], ["Phone", d.phone || "—"], ["Amount", inr(d.amount)], ["Cause", d.cause], ["Payment method", methodLabel(d.payment_method)], ["Transaction / UTR", d.transaction_ref || "—"], ["Status", <StatusBadge s={d.status} />], ["Received", dt(d.created_at)], ["Verified at", d.verified_at ? dt(d.verified_at) : "—"], ["Notes", d.notes || "—"]];
