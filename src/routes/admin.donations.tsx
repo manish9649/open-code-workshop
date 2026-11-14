@@ -150,11 +150,28 @@ function Details({ d, onClose }: { d: Donation; onClose: () => void }) {
     } catch (error) { toast.error(error instanceof Error ? error.message : "Could not open the document."); }
     finally { setBusy(false); }
   }
-  const rows: [string, ReactNode][] = [["Donation Reference", <span className="font-mono text-xs">{d.reference_number ?? d.id}</span>], ["Donor", d.donor_name], ["Email", d.email || "—"], ["Phone", d.phone || "—"], ["Amount", inr(d.amount)], ["Cause", d.cause], ["Payment method", methodLabel(d.payment_method)], ["Transaction / UTR", d.transaction_ref || "—"], ["Status", <StatusBadge s={d.status} />], ["Received", dt(d.created_at)], ["Verified at", d.verified_at ? dt(d.verified_at) : "—"], ["Notes", d.notes || "—"]];
+  const emailStatus = d.receipt_email_status === "sent" ? `Sent ${d.receipt_email_sent_at ? dt(d.receipt_email_sent_at) : ""}` : d.receipt_email_status === "email_setup_required" ? "Email setup required" : d.receipt_email_status?.startsWith("failed") ? "Sending failed — use Resend" : "Not sent yet";
+  const rows: [string, ReactNode][] = [["Donation Reference", <span className="font-mono text-xs">{d.reference_number ?? d.id}</span>], ["Donor", d.donor_name], ["Email", d.email || "—"], ["Phone", d.phone || "—"], ["Amount", inr(d.amount)], ["Cause", d.cause], ["Payment method", methodLabel(d.payment_method)], ["Transaction / UTR", d.transaction_ref || "—"], ["Status", <StatusBadge s={d.status} />], ["Received", dt(d.created_at)], ["Verified at", d.verified_at ? dt(d.verified_at) : "—"], ["Receipt No.", d.receipt_number ? <span className="font-mono text-xs">{d.receipt_number}</span> : "—"], ["Receipt email", d.status === "verified" ? emailStatus : "—"], ["Notes", d.notes || "—"]];
   return (
     <Modal title="Donation details" onClose={onClose}>
       <dl className="grid grid-cols-[120px_minmax(0,1fr)] gap-x-2 gap-y-2 text-sm">{rows.map(([k, v]) => <Fragment key={k}><dt className="text-muted-foreground">{k}</dt><dd className="break-words">{v}</dd></Fragment>)}</dl>
       {d.screenshot_path && <div className="mt-4"><div className="flex flex-wrap gap-2"><Button variant="outline" disabled={busy} onClick={() => openScreenshot()}><Image />View screenshot</Button><Button variant="outline" disabled={busy} onClick={() => openScreenshot(true)}><Download />Download screenshot</Button></div>{imageUrl && <img src={imageUrl} alt="Uploaded payment screenshot" className="mt-3 h-auto max-h-96 w-full object-contain" />}</div>}
+      {d.status === "verified" && (
+        <div className="mt-4 rounded-lg border p-3">
+          <p className="mb-2 text-sm font-semibold text-forest">Receipt &amp; thank-you letter</p>
+          {d.receipt_path ? (
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" size="sm" disabled={busy} onClick={() => openDocument("receipt")}>View receipt</Button>
+              <Button variant="outline" size="sm" disabled={busy} onClick={() => openDocument("receipt", true)}><Download />Receipt</Button>
+              <Button variant="outline" size="sm" disabled={busy} onClick={() => openDocument("thankYou")}>View letter</Button>
+              <Button variant="outline" size="sm" disabled={busy} onClick={() => openDocument("thankYou", true)}><Download />Letter</Button>
+              <Button variant="saffron" size="sm" disabled={busy || !d.email} onClick={async () => { setBusy(true); try { await resendEmail(); } catch (error) { toast.error(error instanceof Error ? error.message : "Could not send the email."); } finally { setBusy(false); } }}>Resend email</Button>
+            </div>
+          ) : (
+            <Button variant="saffron" size="sm" disabled={busy} onClick={async () => { setBusy(true); try { await prepareReceipt(true); await qc.invalidateQueries({ queryKey: ["admin", "donations"] }); } catch (error) { toast.error(error instanceof Error ? error.message : "Could not create the receipt."); } finally { setBusy(false); } }}>Create receipt &amp; email donor</Button>
+          )}
+        </div>
+      )}
       <div className="mt-5 flex flex-wrap gap-2">
         {STATUSES.filter((s) => s !== d.status).map((s) => <Button key={s} disabled={busy} size="sm" variant={s === "verified" ? "saffron" : "outline"} onClick={() => setStatus(s)} className="capitalize">Mark {s}</Button>)}
       </div>
