@@ -3,6 +3,8 @@ export type Donation = {
   id: string; donor_name: string; email: string; phone: string; amount: number; cause: string;
   payment_method: string; transaction_ref: string; status: DonationStatus; verified_at: string | null;
   notes: string; created_at: string; reference_number?: string; screenshot_path?: string | null;
+  receipt_number?: string | null; receipt_path?: string | null; thank_you_path?: string | null;
+  receipt_email_sent_at?: string | null; receipt_email_status?: string | null;
 };
 export const STATUSES: DonationStatus[] = ["verified", "pending", "rejected", "failed", "refunded"];
 export const METHODS = ["bank_transfer", "upi", "cash", "cheque", "online"];

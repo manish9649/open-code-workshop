@@ -1,6 +1,6 @@
 # Website completion
-- [ ] Donation receipt system: unique receipt numbers, PDF receipt + thank-you letter, private storage, admin view/download/resend, email status tracking.
-- [ ] Automatic receipt email delivery — blocked until the user sets up a sender email domain (setup dialog shown).
+- [x] Donation receipt system: unique receipt numbers, PDF receipt + thank-you letter, private storage, admin view/download/resend, email status tracking.
+- [ ] Automatic receipt email delivery — blocked until the user sets up a sender email domain (setup dialog shown); then scaffold email templates and set the sender domain for the send function.
 - [x] Replace donation email drafts with Cloud-backed saved submissions, private screenshot uploads, duplicate prevention, reference numbers, and admin review/search/reporting; verify public saving and duplicate rejection.
 - [ ] Verify admin screenshot viewing/downloads and verification end-to-end — Cloud has no administrator account yet; original accounts and records have not been migrated.
 - [ ] Migrate original website accounts, records, and stored files to Cloud — original service access is unavailable; no original data was deleted.
