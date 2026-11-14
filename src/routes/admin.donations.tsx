@@ -131,7 +131,7 @@ function Details({ d, onClose }: { d: Donation; onClose: () => void }) {
     const { receiptNumber } = await receiptNumberFn({ data: { id: d.id } });
     const [receiptBlob, letterBlob] = await Promise.all([generateDonationReceipt(d, receiptNumber), generateThankYouLetter(d)]);
     const [receipt, thankYou] = await Promise.all([blobToBase64(receiptBlob), blobToBase64(letterBlob)]);
-    const { receiptNumber } = await saveDocs({ data: { id: d.id, receipt, thankYou } });
+    await saveDocs({ data: { id: d.id, receipt, thankYou } });
     toast.success(`Receipt ${receiptNumber} created.`);
     if (email) await resendEmail();
   }
