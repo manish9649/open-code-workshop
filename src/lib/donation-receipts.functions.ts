@@ -12,6 +12,21 @@ async function requireAdmin(context: AdminContext) {
   if (error || !admin) throw new Error("Administrator access required.");
 }
 
+/** Assigns (or returns the existing) unique receipt number for a verified donation. */
+export const donationReceiptNumber = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
+  .handler(async ({ context, data }) => {
+    await requireAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: row, error } = await supabaseAdmin.from("donations").select("status").eq("id", data.id).single();
+    if (error || !row) throw new Error("Donation not found.");
+    if (row.status !== "verified") throw new Error("Receipt numbers are assigned only to verified donations.");
+    const { data: receiptNumber, error: numberError } = await supabaseAdmin.rpc("assign_donation_receipt", { donation_id: data.id });
+    if (numberError || !receiptNumber) throw new Error("Could not assign a receipt number. Please try again.");
+    return { receiptNumber };
+  });
+
 /** Saves the generated receipt and thank-you PDFs and assigns a unique receipt number. */
 export const saveDonationDocuments = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

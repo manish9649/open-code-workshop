@@ -4,7 +4,7 @@ import { Download, Plus, X, Image } from "lucide-react";
 import { useMemo, useState, type FormEvent, type ReactNode, Fragment } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { donationScreenshot } from "@/lib/donation-submission.functions";
-import { donationDocumentUrl, saveDonationDocuments, sendDonationReceiptEmail } from "@/lib/donation-receipts.functions";
+import { donationDocumentUrl, donationReceiptNumber, saveDonationDocuments, sendDonationReceiptEmail } from "@/lib/donation-receipts.functions";
 import { blobToBase64, generateDonationReceipt, generateThankYouLetter } from "@/lib/donation-receipt";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -125,9 +125,11 @@ function Details({ d, onClose }: { d: Donation; onClose: () => void }) {
   const saveDocs = useServerFn(saveDonationDocuments);
   const sendEmail = useServerFn(sendDonationReceiptEmail);
   const docUrl = useServerFn(donationDocumentUrl);
+  const receiptNumberFn = useServerFn(donationReceiptNumber);
   /** Generates the receipt + thank-you PDFs, stores them, and emails the donor. */
   async function prepareReceipt(email = false) {
-    const [receiptBlob, letterBlob] = await Promise.all([generateDonationReceipt(d, d.receipt_number ?? ""), generateThankYouLetter(d)]);
+    const { receiptNumber } = await receiptNumberFn({ data: { id: d.id } });
+    const [receiptBlob, letterBlob] = await Promise.all([generateDonationReceipt(d, receiptNumber), generateThankYouLetter(d)]);
     const [receipt, thankYou] = await Promise.all([blobToBase64(receiptBlob), blobToBase64(letterBlob)]);
     const { receiptNumber } = await saveDocs({ data: { id: d.id, receipt, thankYou } });
     toast.success(`Receipt ${receiptNumber} created.`);
