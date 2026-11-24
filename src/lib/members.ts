@@ -29,6 +29,7 @@ export const memberSchema = z.object({
 export type MemberInput = z.infer<typeof memberSchema>;
 export const memberFileSchema = z.string().regex(/^records\/[0-9a-f-]{36}\/(photo|signature)-[0-9a-f-]{36}\.png$/);
 export const memberPhotoSchema = z.union([memberFileSchema, z.literal("")]);
+export const memberSignatureSchema = z.union([memberFileSchema, z.literal("")]);
 export const verificationNumberSchema = z.string().trim().toUpperCase().regex(/^SSWS-[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$/, "Enter a complete membership certificate number.");
 export const certificateTimestampSchema = z.string().datetime({ offset: true });
 export function filterMembers(rows: MemberView[], search: string) {

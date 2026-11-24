@@ -16,7 +16,6 @@ import { certificateDetails } from "@/lib/certificate-details";
 export function MemberForm({ member, onClose, onSaved }: { member: MemberView | null; onClose: () => void; onSaved: (id: string) => void }) {
   const [form, setForm] = useState<MemberInput>(member ? memberSchema.parse({ ...member, signatory_name: certificateDetails.signatoryName }) : { full_name: "", father_name: "", date_of_birth: "", mobile: "", email: "", address: "", joining_date: new Date().toISOString().slice(0, 10), membership_type: "Member", status: "active", notes: "", signatory_name: certificateDetails.signatoryName });
   const [photo, setPhoto] = useState<File | null>(null);
-  const signature: File | null = null;
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
   const save = useServerFn(saveMember);
@@ -26,7 +25,7 @@ export function MemberForm({ member, onClose, onSaved }: { member: MemberView | 
     const parsed = memberSchema.safeParse(form);
     const issues: Record<string, string> = {};
     if (!parsed.success) for (const issue of parsed.error.issues) issues[String(issue.path[0])] = issue.message;
-    for (const [key, file] of [["photo", photo], ["signature", signature]] as const) if (file) {
+    for (const [key, file] of [["photo", photo]] as const) if (file) {
       try { validateMemberImage(file); } catch (error) { issues[key] = (error as Error).message; }
     }
     setErrors(issues);
@@ -38,13 +37,11 @@ export function MemberForm({ member, onClose, onSaved }: { member: MemberView | 
       const folder = crypto.randomUUID();
       const photoPath = photo ? await uploadMemberImage(photo, folder, "photo") : member?.photo_path ?? "";
       if (photo) uploaded.push(photoPath);
-      const signaturePath = member?.signature_path || await uploadMemberImage(new File([await (await fetch("/authorized-signature.png")).blob()], "signature.png", { type: "image/png" }), folder, "signature");
-      if (!member?.signature_path) uploaded.push(signaturePath);
-      if (signature) uploaded.push(signaturePath);
+      const signaturePath = member?.signature_path ?? "";
       const row = await save({ data: { ...(member ? { id: member.id } : {}), member: parsed.data, photo_path: photoPath, signature_path: signaturePath } });
       savedId = row.id;
       if (member) {
-        const oldFiles = [photo ? member.photo_path : "", signature ? member.signature_path : "", member.certificate_path].filter(Boolean);
+        const oldFiles = [photo ? member.photo_path : "", member.certificate_path].filter(Boolean);
         if (oldFiles.length) await supabase.storage.from("members").remove(oldFiles);
       }
       toast.success(member ? "Member updated. Preparing appointment letter…" : "Member registered. Preparing appointment letter…");

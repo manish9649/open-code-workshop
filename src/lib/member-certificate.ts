@@ -4,7 +4,9 @@ import type { MemberView } from "@/lib/members";
 import { certificateDetails } from "@/lib/certificate-details";
 
 export async function imageToPng(file: File) {
-  const bitmap = await createImageBitmap(file);
+  let bitmap: ImageBitmap;
+  try { bitmap = await createImageBitmap(file); }
+  catch { throw new Error("This photo could not be opened. Please choose a valid JPG, PNG or WebP photo."); }
   const ratio = Math.min(1, 700 / Math.max(bitmap.width, bitmap.height));
   const c = document.createElement("canvas"); c.width = Math.round(bitmap.width * ratio); c.height = Math.round(bitmap.height * ratio);
   const ctx = c.getContext("2d");

@@ -1,9 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { memberSchema, filterMembers, validateMemberImage, certificateTimestampSchema, memberPhotoSchema, verificationNumberSchema, type MemberView } from "@/lib/members";
+import { memberSchema, filterMembers, validateMemberImage, certificateTimestampSchema, memberPhotoSchema, memberSignatureSchema, verificationNumberSchema, type MemberView } from "@/lib/members";
 import { certificateDetails, certificateIssueDate, certificateVerificationUrl } from "@/lib/certificate-details";
 
 const valid = { full_name: "Test Member", father_name: "Test Father", date_of_birth: "1990-01-01", mobile: "919999999999", email: "member@example.com", address: "123 Test Road, Test City", joining_date: "2026-11-04", membership_type: "Member", status: "active", notes: "", signatory_name: "Rakesh Kumar" };
 describe("Member registration", () => {
+  it("saves members without a preset signature and accepts existing private signatures", () => {
+    expect(memberSignatureSchema.safeParse("").success).toBe(true);
+    expect(memberSignatureSchema.safeParse("records/00000000-0000-4000-8000-000000000001/signature-00000000-0000-4000-8000-000000000002.png").success).toBe(true);
+    expect(memberSignatureSchema.safeParse("/authorized-signature.png").success).toBe(false);
+  });
   it("uses the official society registration number", () => { expect(certificateDetails.registrationNumber).toBe("HR/06-008-2026-01707"); });
   it("uses the official unique identification number", () => { expect(certificateDetails.uniqueIdentificationNumber).toBe("2000168677"); });
   it("only accepts the authorized signatory Rakesh Kumar", () => {

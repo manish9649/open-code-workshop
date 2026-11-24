@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { appointmentLetterNumbers, memberSchema, memberFileSchema, memberPhotoSchema, certificateTimestampSchema } from "@/lib/members";
+import { appointmentLetterNumbers, memberSchema, memberSignatureSchema, memberPhotoSchema, certificateTimestampSchema } from "@/lib/members";
 import { certificateDetails } from "@/lib/certificate-details";
 
 export const listMembers = createServerFn({ method: "POST" })
@@ -28,7 +28,7 @@ export const listMembers = createServerFn({ method: "POST" })
 
 export const saveMember = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => z.object({ id: z.string().uuid().optional(), member: memberSchema, photo_path: memberPhotoSchema, signature_path: memberFileSchema }).parse(input))
+  .inputValidator((input: unknown) => z.object({ id: z.string().uuid().optional(), member: memberSchema, photo_path: memberPhotoSchema, signature_path: memberSignatureSchema }).parse(input))
   .handler(async ({ context, data }) => {
     const { data: admin, error: roleError } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
     if (roleError || !admin) throw new Error("Administrator access required.");

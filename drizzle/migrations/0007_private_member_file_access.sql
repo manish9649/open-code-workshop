@@ -1,0 +1,1 @@
+CREATE POLICY "Administrators manage member files" ON storage.objects FOR ALL TO authenticated USING (bucket_id = 'members' AND public.has_role(auth.uid(), 'admin'::public.app_role)) WITH CHECK (bucket_id = 'members' AND public.has_role(auth.uid(), 'admin'::public.app_role));

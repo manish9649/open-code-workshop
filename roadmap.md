@@ -1,4 +1,5 @@
 # Website completion
+- [x] Repair Add Member photo saving: provision private member storage and remove obsolete automatic signature decoding; verified signed-in member saving and appointment-letter PDF download, then removed the test member.
 - [x] Donation receipt system: unique receipt numbers, PDF receipt + thank-you letter, private storage, admin view/download/resend, email status tracking.
 - [ ] Automatic receipt email delivery — blocked until the user sets up a sender email domain (setup dialog shown); then scaffold email templates and set the sender domain for the send function.
 - [x] Replace donation email drafts with Cloud-backed saved submissions, private screenshot uploads, duplicate prevention, reference numbers, and admin review/search/reporting; verify public saving and duplicate rejection.

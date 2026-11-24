@@ -30,6 +30,7 @@ use the editor.
 <!-- LOVABLE:END -->
 
 - Keep appointment-letter rendering in the existing member document module, using its design version to replace outdated saved PDFs without adding a second admin feature.
+- Member registration must not fetch a bundled default signature; allow an empty legacy signature path and keep photos and letters in administrator-only private member storage.
 - Keep the manual-QR donation presentation in the existing donation route; do not claim form submissions are saved until a delivery service is connected.
 - QR donation submissions use a validated server function, private screenshot storage, database uniqueness for retries and UTRs, and pending status; show confirmation only after saving, because uploads do not verify payments.
 - Optional donation identity fields remain browser-local and are excluded from submissions to avoid collecting unnecessary sensitive documents.

@@ -50,6 +50,13 @@
       "when": 1794554933646,
       "tag": "0006_donation_receipts",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1795540833528,
+      "tag": "0007_private_member_file_access",
+      "breakpoints": true
     }
   ]
 }
