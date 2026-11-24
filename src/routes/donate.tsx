@@ -4,7 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import phonePe from "@/assets/donation-phonepe.jpeg.asset.json";
+import donationQr from "@/assets/donation-pnb.jpeg.asset.json";
 import { site } from "@/lib/site";
 import { donationSubmissionSchema, receiptMessage, screenshotLimit, screenshotType } from "@/lib/donation-submission";
 import { submitDonation } from "@/lib/donation-submission.functions";
@@ -13,9 +13,9 @@ export const Route = createFileRoute("/donate")({
   head: () => ({
     meta: [
       { title: "Donate — Shiv Sewa Welfare Society" },
-      { name: "description", content: "Support Shiv Sewa Welfare Society through the supplied PhonePe payment QR code." },
+      { name: "description", content: "Support Shiv Sewa Welfare Society through the society's PNB UPI payment QR code." },
       { property: "og:title", content: "Donate to Shiv Sewa Welfare Society" },
-      { property: "og:description", content: "Support our cause with a contribution using the supplied PhonePe QR code." },
+      { property: "og:description", content: "Support our cause with a contribution using the society's PNB UPI QR code." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -75,8 +75,8 @@ function Donate() {
           </div>
            <div className="mt-4 rounded-sm bg-donation-paper p-5 text-center shadow-donation">
             <h2 className="flex items-center justify-center gap-1.5 text-sm font-bold"><QrCode className="h-4 w-4" /> Scan QR Code to Pay</h2>
-            <img src={phonePe.url} alt="PhonePe payment QR code for Manish Gour" className="mx-auto mt-4 h-auto w-full max-w-64 rounded-sm border border-donation-accent" />
-            <p className="mt-3 text-xs text-donation-muted">Payment recipient: <strong className="text-donation-ink">Manish Gour</strong></p>
+            <img src={donationQr.url} alt="PNB UPI payment QR code for Shiv Sewa Welfare Society" className="mx-auto mt-4 h-auto w-full max-w-64 rounded-sm border border-donation-accent" />
+            <p className="mt-3 text-xs text-donation-muted">Payment recipient: <strong className="text-donation-ink">Shiv Sewa Welfare Society</strong></p>
             <p className="mt-2 flex items-center justify-center gap-1 text-xs text-donation-muted"><Info className="h-3 w-3 shrink-0" /> Scan with any UPI app to donate.</p>
           </div>
         </div>
