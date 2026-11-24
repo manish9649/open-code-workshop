@@ -1,4 +1,5 @@
 # Website completion
+- [x] Remove page-opening animation delays, cache verified admin navigation, serve fonts locally, defer homepage gallery; verified signed-in tab changes reuse one auth/role check and one donation fetch, sign-out blocks access, and desktop/mobile layouts render without runtime errors (49 tests passed).
 - [x] Repair Add Member photo saving: provision private member storage and remove obsolete automatic signature decoding; verified signed-in member saving and appointment-letter PDF download, then removed the test member.
 - [x] Donation receipt system: unique receipt numbers, PDF receipt + thank-you letter, private storage, admin view/download/resend, email status tracking.
 - [ ] Automatic receipt email delivery — blocked until the user sets up a sender email domain (setup dialog shown); then scaffold email templates and set the sender domain for the send function.

@@ -40,7 +40,7 @@ function Home() {
         <motion.div style={{ y }} className="absolute inset-0">
            <motion.img src={hero} alt="Volunteers distributing food to families in a village" width={1600} height={1008}
             fetchPriority="high" loading="eager" decoding="async"
-            initial={{ scale: 1.15, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 1.6, ease: "easeOut" }}
+            initial={false}
             className="h-full w-full object-cover" />
         </motion.div>
         <div className="absolute inset-0 bg-gradient-to-r from-forest/95 via-forest/65 to-forest/10" />
@@ -63,20 +63,19 @@ function Home() {
           </Float>
         </div>
         <div className="relative mx-auto w-full max-w-7xl px-6 pt-24">
-          <motion.span initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="eyebrow">{site.tagline}</motion.span>
+          <motion.span initial={false} className="eyebrow">{site.tagline}</motion.span>
           <h1 className="mt-5 max-w-3xl text-4xl font-extrabold leading-[1.1] sm:text-5xl md:text-6xl">
             {headline.map((w, i) => (
-              <motion.span key={i} className="mr-[0.25em] inline-block" initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 + i * 0.08, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}>
+              <motion.span key={i} className="mr-[0.25em] inline-block" initial={false}>
                 {w === "Society" ? <span className="text-saffron">{w}</span> : w}{" "}
               </motion.span>
             ))}
           </h1>
-          <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.9, duration: 0.8 }}
+          <motion.p initial={false}
             className="mt-6 max-w-xl text-lg opacity-90">
             Shiv Sewa Welfare Society believes that every act of kindness can create lasting change. Join us in supporting communities, spreading hope, and making essential opportunities accessible to those who need them.
           </motion.p>
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.1 }} className="mt-10 flex flex-wrap gap-4">
+          <motion.div initial={false} className="mt-10 flex flex-wrap gap-4">
             <Link to="/donate" className="btn-saffron"><Heart className="h-4 w-4" /> Donate Now</Link>
             <Link to="/about" className="btn-outline-light">Discover Our Mission <ArrowRight className="h-4 w-4" /></Link>
           </motion.div>
@@ -134,7 +133,7 @@ function Home() {
                   <motion.article whileHover={{ y: -8 }} transition={{ type: "spring", stiffness: 300, damping: 22 }}
                     className="group flex h-full flex-col overflow-hidden rounded-3xl bg-card shadow-soft">
                     <div className="aspect-[4/3] overflow-hidden">
-                      <img src={c.image} alt={c.title} width={1200} height={912} loading="lazy" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                      <img src={c.image} alt={c.title} width={1200} height={912} loading="lazy" decoding="async" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
                     </div>
                     <div className="flex flex-1 flex-col p-7">
                       <h3 className="text-xl font-extrabold text-forest">{c.title}</h3>

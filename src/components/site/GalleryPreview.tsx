@@ -1,12 +1,20 @@
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { motion } from "framer-motion";
+import { motion, useInView } from "framer-motion";
+import { useRef } from "react";
 import { ArrowRight } from "lucide-react";
 import { fetchPreviewPhotos } from "@/lib/gallery";
 import { Reveal } from "./Motion";
 
 export function GalleryPreview() {
-  const { data } = useQuery({ queryKey: ["gallery", "preview"], queryFn: () => fetchPreviewPhotos(6) });
+  const ref = useRef<HTMLDivElement>(null);
+  const nearViewport = useInView(ref, { once: true, margin: "600px" });
+  return <div ref={ref}>{nearViewport ? <GalleryPreviewContent /> : <div className="min-h-64" />}</div>;
+}
+
+function GalleryPreviewContent() {
+  const { data, isPending } = useQuery({ queryKey: ["gallery", "preview"], queryFn: () => fetchPreviewPhotos(6), staleTime: 5 * 60_000 });
+  if (isPending) return <div className="min-h-64" />;
   const photos = data ?? [];
   if (!photos.length) return null;
   return (
@@ -17,10 +25,10 @@ export function GalleryPreview() {
         <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">Real moments from our service activities.</p>
       </Reveal>
       <div className="mt-12 grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4">
-        {photos.map((p, i) => (
-          <motion.div key={p.id} initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.06 }}
+        {photos.map((p) => (
+          <motion.div key={p.id} initial={false}
             className="group aspect-[4/3] overflow-hidden rounded-lg bg-muted">
-            <img src={p.url} alt={p.caption || p.title} loading="lazy" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
+            <img src={p.url} alt={p.caption || p.title} loading="lazy" decoding="async" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
           </motion.div>
         ))}
       </div>

@@ -24,7 +24,7 @@ export function Navbar() {
   const solid = scrolled || open;
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   return (
-    <motion.header initial={{ y: -80, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+    <motion.header initial={false}
       className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${solid ? "bg-background/90 py-3 shadow-soft backdrop-blur-md" : "py-5"}`}>
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6">
         <Link to="/" aria-label="Shiv Sewa Welfare Society home" onClick={() => setOpen(false)}>

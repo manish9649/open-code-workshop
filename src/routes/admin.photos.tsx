@@ -49,7 +49,7 @@ function Dashboard() {
           {albums.data?.map((a) => (
             <button key={a.id} type="button" onClick={() => setSelected(a.id)}
               className={`flex w-full items-center gap-3 rounded-lg border p-2 text-left ${selected === a.id ? "border-forest bg-secondary" : "bg-card"}`}>
-              <div className="h-12 w-12 shrink-0 overflow-hidden rounded bg-muted">{coverOf(a) && <img src={coverOf(a)!.url} alt="" className="h-full w-full object-cover" />}</div>
+              <div className="h-12 w-12 shrink-0 overflow-hidden rounded bg-muted">{coverOf(a) && <img src={coverOf(a)?.url} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />}</div>
               <div className="min-w-0"><p className="truncate font-semibold">{a.title}</p><p className="text-xs text-muted-foreground">{a.published ? "Published" : "Draft"} · {a.photos.length} photos</p></div>
             </button>
           ))}
@@ -164,7 +164,7 @@ function AlbumEditor({ album, categories, onChange, onDeleted }: { album: Galler
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {album.photos.map((p, i) => (
           <div key={p.id} className="overflow-hidden rounded-lg border bg-card">
-            <div className="relative aspect-[4/3] bg-muted"><img src={p.url} alt={p.caption || album.title} className="h-full w-full object-contain" />
+            <div className="relative aspect-[4/3] bg-muted"><img src={p.url} alt={p.caption || album.title} loading="lazy" decoding="async" className="h-full w-full object-contain" />
               {album.cover_photo_id === p.id && <span className="absolute left-2 top-2 rounded bg-saffron px-2 py-0.5 text-xs font-bold text-saffron-foreground">Cover</span>}</div>
             <div className="space-y-2 p-3">
               <Input defaultValue={p.caption} placeholder="Caption (optional)" aria-label="Caption" onBlur={(e) => e.target.value !== p.caption && caption(p.id, e.target.value)} />

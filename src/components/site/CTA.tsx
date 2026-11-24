@@ -23,7 +23,7 @@ export function CTA({ title, button, to }: { title: string; button: string; to: 
             ))}
           </h2>
           <motion.div className="mx-auto mt-6 h-1 w-20 origin-center rounded-full bg-saffron"
-            initial={{ scaleX: 0 }} whileInView={{ scaleX: 1 }} viewport={{ once: true }} transition={{ duration: 0.8, delay: 0.3 }} />
+            initial={false} />
           <Link to={to} className="btn-saffron mt-10">
             <motion.span animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }} className="inline-flex">
               <Heart className="h-4 w-4" />

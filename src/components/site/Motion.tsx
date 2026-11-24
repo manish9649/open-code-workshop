@@ -1,47 +1,17 @@
 import { motion, useInView, useMotionValue, useSpring, useTransform, animate, useReducedMotion, useScroll } from "framer-motion";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
-export function Reveal({ children, delay = 0, className = "" }: { children: ReactNode; delay?: number; className?: string }) {
-  return (
-    <motion.div
-      className={className}
-      initial={{ opacity: 0, y: 32 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-60px" }}
-      transition={{ duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] }}
-    >
-      {children}
-    </motion.div>
-  );
+/** Content is visible on first paint; interaction animations remain available. */
+export function Reveal({ children, className = "" }: { children: ReactNode; delay?: number; className?: string }) {
+  return <div className={className}>{children}</div>;
 }
 
-/** Staggered entrance for a group of children. Wrap items in <StaggerItem>. */
-export function Stagger({ children, className = "", delay = 0 }: { children: ReactNode; className?: string; delay?: number }) {
-  return (
-    <motion.div
-      className={className}
-      initial="hidden"
-      whileInView="show"
-      viewport={{ once: true, margin: "-60px" }}
-      variants={{ hidden: {}, show: { transition: { staggerChildren: 0.09, delayChildren: delay } } }}
-    >
-      {children}
-    </motion.div>
-  );
+export function Stagger({ children, className = "" }: { children: ReactNode; className?: string; delay?: number }) {
+  return <div className={className}>{children}</div>;
 }
 
 export function StaggerItem({ children, className = "" }: { children: ReactNode; className?: string }) {
-  return (
-    <motion.div
-      className={className}
-      variants={{
-        hidden: { opacity: 0, y: 28, scale: 0.97 },
-        show: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } },
-      }}
-    >
-      {children}
-    </motion.div>
-  );
+  return <div className={className}>{children}</div>;
 }
 
 /** Gentle infinite floating motion (disabled automatically for reduced-motion users). */
@@ -94,12 +64,9 @@ export function ImageReveal({ src, alt, className = "", width, height, eager = f
   return (
     <motion.div
       className={`group overflow-hidden rounded-3xl shadow-soft ${className}`}
-      initial={{ clipPath: "inset(12% 12% 12% 12% round 24px)", opacity: 0 }}
-      whileInView={{ clipPath: "inset(0% 0% 0% 0% round 24px)", opacity: 1 }}
-      viewport={{ once: true }}
-      transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+      initial={false}
     >
-      <motion.img src={src} alt={alt} width={width} height={height} loading={eager ? "eager" : "lazy"}
+      <motion.img src={src} alt={alt} width={width} height={height} loading={eager ? "eager" : "lazy"} decoding="async"
         whileHover={{ scale: 1.06 }} transition={{ duration: 0.7, ease: "easeOut" }}
         className="h-full w-full object-cover" />
     </motion.div>
@@ -131,8 +98,8 @@ export function PageHero({ eyebrow, title, text, image }: { eyebrow: string; tit
     <section ref={ref} className="relative overflow-hidden bg-forest pb-24 pt-36 text-forest-foreground">
       <motion.div style={{ y }} className="absolute inset-0">
         <motion.img src={image} alt="" aria-hidden width={1600} height={1000}
-          initial={{ scale: 1.12, opacity: 0 }} animate={{ scale: 1, opacity: 0.2 }} transition={{ duration: 1.4, ease: "easeOut" }}
-          className="h-full w-full object-cover" />
+          initial={false}
+          className="h-full w-full object-cover opacity-20" decoding="async" />
       </motion.div>
       <div className="absolute inset-0 mandala-bg opacity-30" />
       {/* drifting glow orbs */}
@@ -141,18 +108,17 @@ export function PageHero({ eyebrow, title, text, image }: { eyebrow: string; tit
       <motion.div aria-hidden className="absolute -right-16 bottom-0 h-80 w-80 rounded-full bg-saffron/15 blur-3xl"
         animate={{ y: [0, -25, 0], x: [0, -15, 0] }} transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }} />
       <div className="relative mx-auto max-w-5xl px-6 text-center">
-        <motion.span initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="eyebrow">{eyebrow}</motion.span>
+        <motion.span initial={false} className="eyebrow">{eyebrow}</motion.span>
         <h1 className="mt-4 text-4xl font-extrabold md:text-6xl">
           {words.map((w, i) => (
             <motion.span key={i} className="mr-[0.25em] inline-block"
-              initial={{ opacity: 0, y: 36, rotateX: -40 }} animate={{ opacity: 1, y: 0, rotateX: 0 }}
-              transition={{ delay: 0.15 + i * 0.07, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}>
+              initial={false}>
               {w}
             </motion.span>
           ))}
         </h1>
         {text && (
-          <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.25 + words.length * 0.07 }}
+          <motion.p initial={false}
             className="mx-auto mt-6 max-w-2xl text-lg opacity-85">{text}</motion.p>
         )}
       </div>

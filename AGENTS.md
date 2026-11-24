@@ -35,3 +35,5 @@ use the editor.
 - QR donation submissions use a validated server function, private screenshot storage, database uniqueness for retries and UTRs, and pending status; show confirmation only after saving, because uploads do not verify payments.
 - Optional donation identity fields remain browser-local and are excluded from submissions to avoid collecting unnecessary sensitive documents.
 - Keep private administration page metadata in the shared admin-head helper to provide distinct titles and no-index metadata consistently.
+- Cache server-verified administrator access only in browser memory, scoped to the current token for at most five minutes and cleared on auth changes; database policies and server authorization remain authoritative.
+- Serve variable fonts locally with font-display swap and render page content immediately; defer the optional homepage gallery until near the viewport without delaying the page.
