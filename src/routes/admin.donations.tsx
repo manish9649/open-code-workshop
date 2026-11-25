@@ -118,6 +118,7 @@ function Details({ d, onClose }: { d: Donation; onClose: () => void }) {
     if (error || !saved) throw new Error("Donation status could not be saved.");
     toast.success(`Marked as ${saved.status}`);
     if (status === "verified") await prepareReceipt(true);
+    else if (d.email) { try { const r = await sendEmail({ data: { id: d.id } }); if (r.sent) toast.success("Donor notified by email."); } catch { toast.error("Status saved, but the donor email could not be sent."); } }
     await qc.invalidateQueries({ queryKey: ["admin", "donations"] });
     } catch (error) { toast.error(error instanceof Error ? error.message : "Could not update the donation."); }
     finally { setBusy(false); }
@@ -138,7 +139,7 @@ function Details({ d, onClose }: { d: Donation; onClose: () => void }) {
   async function resendEmail() {
     const result = await sendEmail({ data: { id: d.id } });
     if (result.sent) toast.success("Receipt email sent to the donor.");
-    else toast.info("Receipt saved. Email sending needs a sender domain — set it up, then use Resend email.");
+    else toast.info("Receipt saved. Email will send once the email domain is verified — then use Resend email.");
     await qc.invalidateQueries({ queryKey: ["admin", "donations"] });
   }
   async function openDocument(kind: "receipt" | "thankYou", download = false) {
