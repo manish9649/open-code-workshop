@@ -17,3 +17,7 @@ describe("upiAppLink", () => {
     expect(upiAppLink("phonepe://pay", "10")).toMatch(/^phonepe:\/\/pay\?pa=9991107398m%40pnb.*am=10\.00/);
   });
 });
+
+it("includes the PNB merchant code from the society QR", () => {
+  expect(new URL(upiPayLink("1")).searchParams.get("mc")).toBe("8641");
+});

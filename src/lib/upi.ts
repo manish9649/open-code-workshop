@@ -1,8 +1,10 @@
 export const upiId = "9991107398m@pnb";
-export const upiPayee = "Shiv Sewa Welfare Society";
+export const upiPayee = "SHIV SEWA WELFARE SOCIETY";
+// Merchant category code printed in the society's PNB QR; UPI apps reject merchant IDs without it.
+export const upiMerchantCode = "8641";
 
 export function upiPayLink(amount?: string) {
-  const params = new URLSearchParams({ pa: upiId, pn: upiPayee, cu: "INR", tn: "Donation" });
+  const params = new URLSearchParams({ pa: upiId, pn: upiPayee, mc: upiMerchantCode, cu: "INR", tn: "Donation" });
   const value = Number(amount);
   if (Number.isFinite(value) && value > 0) params.set("am", value.toFixed(2));
   return `upi://pay?${params.toString()}`;

@@ -79,6 +79,7 @@ function Donate() {
             <h2 className="flex items-center justify-center gap-1.5 text-sm font-bold"><QrCode className="h-4 w-4" /> Scan QR Code to Pay</h2>
             <a href={upiPayLink(amount)} aria-label="Pay with a UPI app"><img src={donationQr.url} alt="PNB UPI payment QR code for Shiv Sewa Welfare Society" className="mx-auto mt-4 h-auto w-full max-w-64 rounded-sm border border-donation-accent" /></a>
             <div className="mx-auto mt-4 grid max-w-64 grid-cols-2 gap-2">{upiApps.map((app) => <Button key={app.name} asChild variant={app.prefix === "upi://pay" ? "outline" : "default"}><a href={upiAppLink(app.prefix, amount)}>{app.name}</a></Button>)}</div>
+            <a href={donationQr.url} download="shiv-sewa-upi-qr.jpeg" target="_blank" rel="noreferrer" className="mt-3 inline-block text-xs font-semibold text-donation-ink underline underline-offset-4">Download QR (then scan it from your gallery in any UPI app)</a>
             <p className="mt-2 text-xs text-donation-muted">On mobile, tap to open your UPI app{amount ? ` with ₹${amount}` : ""}. UPI ID: <strong className="text-donation-ink">{upiId}</strong></p>
             <p className="mt-3 text-xs text-donation-muted">Payment recipient: <strong className="text-donation-ink">Shiv Sewa Welfare Society</strong></p>
             <p className="mt-2 flex items-center justify-center gap-1 text-xs text-donation-muted"><Info className="h-3 w-3 shrink-0" /> Scan with any UPI app to donate.</p>
