@@ -8,6 +8,7 @@ import donationQr from "@/assets/donation-pnb.jpeg.asset.json";
 import { site } from "@/lib/site";
 import { donationSubmissionSchema, receiptMessage, screenshotLimit, screenshotType } from "@/lib/donation-submission";
 import { submitDonation } from "@/lib/donation-submission.functions";
+import { upiId, upiPayLink } from "@/lib/upi";
 
 export const Route = createFileRoute("/donate")({
   head: () => ({
@@ -29,6 +30,7 @@ const labelClass = "block text-xs font-medium text-donation-muted";
 function Donate() {
   const [reference, setReference] = useState("");
   const [busy, setBusy] = useState(false);
+  const [amount, setAmount] = useState("");
   const [submissionKey, setSubmissionKey] = useState("");
   const save = useServerFn(submitDonation);
   const [error, setError] = useState("");
@@ -75,7 +77,9 @@ function Donate() {
           </div>
            <div className="mt-4 rounded-sm bg-donation-paper p-5 text-center shadow-donation">
             <h2 className="flex items-center justify-center gap-1.5 text-sm font-bold"><QrCode className="h-4 w-4" /> Scan QR Code to Pay</h2>
-            <img src={donationQr.url} alt="PNB UPI payment QR code for Shiv Sewa Welfare Society" className="mx-auto mt-4 h-auto w-full max-w-64 rounded-sm border border-donation-accent" />
+            <a href={upiPayLink(amount)} aria-label="Pay with a UPI app"><img src={donationQr.url} alt="PNB UPI payment QR code for Shiv Sewa Welfare Society" className="mx-auto mt-4 h-auto w-full max-w-64 rounded-sm border border-donation-accent" /></a>
+            <Button asChild className="mt-4 w-full max-w-64"><a href={upiPayLink(amount)}>Pay via GPay / PhonePe / Paytm</a></Button>
+            <p className="mt-2 text-xs text-donation-muted">On mobile, tap to open your UPI app{amount ? ` with ₹${amount}` : ""}. UPI ID: <strong className="text-donation-ink">{upiId}</strong></p>
             <p className="mt-3 text-xs text-donation-muted">Payment recipient: <strong className="text-donation-ink">Shiv Sewa Welfare Society</strong></p>
             <p className="mt-2 flex items-center justify-center gap-1 text-xs text-donation-muted"><Info className="h-3 w-3 shrink-0" /> Scan with any UPI app to donate.</p>
           </div>
@@ -89,7 +93,7 @@ function Donate() {
               <label className={labelClass}>Email *<input name="email" type="email" autoComplete="email" maxLength={255} required placeholder="your@email.com" className={inputClass} /></label>
               <label className={labelClass}>Phone Number *<input name="phone" type="tel" autoComplete="tel" minLength={7} maxLength={20} required placeholder="10-digit mobile" className={inputClass} /></label>
             </div>
-            <label className={labelClass}>Donation Amount (₹) *<input name="amount" type="number" min="0.01" step="0.01" required placeholder="Enter amount" className={inputClass} /></label>
+            <label className={labelClass}>Donation Amount (₹) *<input name="amount" value={amount} onChange={(e) => setAmount(e.target.value)} type="number" min="0.01" step="0.01" required placeholder="Enter amount" className={inputClass} /></label>
             <label className={labelClass}>Transaction ID *<input name="transaction" maxLength={100} required placeholder="Enter UPI/Bank transaction ID" className={inputClass} /></label>
              <label className={labelClass}>Payment Screenshot *<input name="paymentScreenshot" type="file" accept="image/png,image/jpeg,image/webp" required className={`${inputClass} bg-donation-surface px-0`} /><span className="mt-1 flex items-center gap-1 text-[10px]"><Info className="h-3 w-3" /> PNG, JPEG, or WebP · Up to 5 MB · Private to authorized admins.</span></label>
              <div className={labelClass}>
