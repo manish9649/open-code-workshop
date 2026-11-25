@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { upiPayLink } from "@/lib/upi";
+import { upiAppLink, upiPayLink } from "@/lib/upi";
 
 describe("upiPayLink", () => {
   it("pays the society PNB UPI ID with the entered amount", () => {
@@ -9,5 +9,11 @@ describe("upiPayLink", () => {
   });
   it("omits invalid amounts", () => {
     expect(new URL(upiPayLink("")).searchParams.has("am")).toBe(false);
+  });
+});
+
+describe("upiAppLink", () => {
+  it("opens PhonePe directly with the same payment details", () => {
+    expect(upiAppLink("phonepe://pay", "10")).toMatch(/^phonepe:\/\/pay\?pa=9991107398m%40pnb.*am=10\.00/);
   });
 });

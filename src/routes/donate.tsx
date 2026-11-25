@@ -8,7 +8,7 @@ import donationQr from "@/assets/donation-pnb.jpeg.asset.json";
 import { site } from "@/lib/site";
 import { donationSubmissionSchema, receiptMessage, screenshotLimit, screenshotType } from "@/lib/donation-submission";
 import { submitDonation } from "@/lib/donation-submission.functions";
-import { upiId, upiPayLink } from "@/lib/upi";
+import { upiAppLink, upiApps, upiId, upiPayLink } from "@/lib/upi";
 
 export const Route = createFileRoute("/donate")({
   head: () => ({
@@ -78,7 +78,7 @@ function Donate() {
            <div className="mt-4 rounded-sm bg-donation-paper p-5 text-center shadow-donation">
             <h2 className="flex items-center justify-center gap-1.5 text-sm font-bold"><QrCode className="h-4 w-4" /> Scan QR Code to Pay</h2>
             <a href={upiPayLink(amount)} aria-label="Pay with a UPI app"><img src={donationQr.url} alt="PNB UPI payment QR code for Shiv Sewa Welfare Society" className="mx-auto mt-4 h-auto w-full max-w-64 rounded-sm border border-donation-accent" /></a>
-            <Button asChild className="mt-4 w-full max-w-64"><a href={upiPayLink(amount)}>Pay via GPay / PhonePe / Paytm</a></Button>
+            <div className="mx-auto mt-4 grid max-w-64 grid-cols-2 gap-2">{upiApps.map((app) => <Button key={app.name} asChild variant={app.prefix === "upi://pay" ? "outline" : "default"}><a href={upiAppLink(app.prefix, amount)}>{app.name}</a></Button>)}</div>
             <p className="mt-2 text-xs text-donation-muted">On mobile, tap to open your UPI app{amount ? ` with ₹${amount}` : ""}. UPI ID: <strong className="text-donation-ink">{upiId}</strong></p>
             <p className="mt-3 text-xs text-donation-muted">Payment recipient: <strong className="text-donation-ink">Shiv Sewa Welfare Society</strong></p>
             <p className="mt-2 flex items-center justify-center gap-1 text-xs text-donation-muted"><Info className="h-3 w-3 shrink-0" /> Scan with any UPI app to donate.</p>
