@@ -6,7 +6,7 @@ export const site = {
   tagline: "Seva Hi Sankalp, Samaj Hi Parivaar.",
   taglineEn: "Service Is Our Commitment, Society Is Our Family.",
   email: "shivseva1707@gmail.com",
-  phone: "+91 9671742116",
+  phone: "+91 9991107398",
   address: "C/o Rakesh Kumar R/o H.No. 225 Near Govt. School, Village Nandnaur, District Sonipat, Haryana",
   mapEmbedUrl: "", // Google Maps embed URL once address is verified
   socials: [

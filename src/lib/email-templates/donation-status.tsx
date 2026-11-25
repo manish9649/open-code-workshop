@@ -15,7 +15,7 @@ interface Props {
 const copy = {
   pending: { title: 'Your donation is under review', text: 'We have received your donation details. Our team is checking the payment with our bank. You will get another email once it is verified.' },
   verified: { title: 'Your donation is verified', text: 'Your payment has been verified. Thank you for supporting our work. Your donation receipt (bill) and thank-you letter are ready below.' },
-  rejected: { title: 'We could not verify your donation', text: 'We could not find this payment in our bank account. Please check the transaction ID / UTR and contact us at shivseva1707@gmail.com or +91 9671742116 so we can help.' },
+  rejected: { title: 'We could not verify your donation', text: 'We could not find this payment in our bank account. Please check the transaction ID / UTR and contact us at shivseva1707@gmail.com or +91 9991107398 so we can help.' },
 }
 
 const Email = ({ name, amount, status = 'pending', reference, receiptNumber, receiptUrl, letterUrl }: Props) => {
