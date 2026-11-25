@@ -2,6 +2,7 @@
 - [x] Remove page-opening animation delays, cache verified admin navigation, serve fonts locally, defer homepage gallery; verified signed-in tab changes reuse one auth/role check and one donation fetch, sign-out blocks access, and desktop/mobile layouts render without runtime errors (49 tests passed).
 - [x] Repair Add Member photo saving: provision private member storage and remove obsolete automatic signature decoding; verified signed-in member saving and appointment-letter PDF download, then removed the test member.
 - [x] Donation receipt system: unique receipt numbers, PDF receipt + thank-you letter, private storage, admin view/download/resend, email status tracking.
+- [x] Warm up the post-donation confirmation: thank the donor, say they will be notified after verification, and drop the "thank-you letter" wording from the donate page message.
 - [ ] Automatic receipt email delivery — blocked until the user sets up a sender email domain (setup dialog shown); then scaffold email templates and set the sender domain for the send function.
 - [x] Replace donation email drafts with Cloud-backed saved submissions, private screenshot uploads, duplicate prevention, reference numbers, and admin review/search/reporting; verify public saving and duplicate rejection.
 - [ ] Verify admin screenshot viewing/downloads and verification end-to-end — Cloud has no administrator account yet; original accounts and records have not been migrated.

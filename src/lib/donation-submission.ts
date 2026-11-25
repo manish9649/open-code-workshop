@@ -17,4 +17,4 @@ export function screenshotType(bytes: Uint8Array): "image/png" | "image/jpeg" | 
   throw new Error("Choose a PNG, JPEG, or WebP payment screenshot.");
 }
 export const initialDonationStatus = "pending" as const;
-export const receiptMessage = "Thank you for supporting Shiv Sewa Welfare Society. Your donation details have been submitted successfully and are awaiting verification. Once your payment is verified, your donation receipt and thank-you letter will be emailed to you.";
+export const receiptMessage = "Thank you for your donation! Your payment details have been submitted and are awaiting verification. You will be notified once your payment is verified, and your donation receipt will be emailed to you.";
