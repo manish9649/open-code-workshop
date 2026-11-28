@@ -9,6 +9,10 @@ export const donationSubmissionSchema = z.object({
   message: z.string().trim().max(2000).default(""),
   submissionKey: z.string().uuid(),
 });
+export const donationSubmissionInputSchema = z.object({
+  details: donationSubmissionSchema,
+  screenshot: z.string().min(1).max(Math.ceil(screenshotLimit / 3) * 4).optional(),
+});
 export function screenshotType(bytes: Uint8Array): "image/png" | "image/jpeg" | "image/webp" {
   if (!bytes.length || bytes.length > screenshotLimit) throw new Error("Choose a payment screenshot up to 5 MB.");
   if ([137,80,78,71,13,10,26,10].every((v,i) => bytes[i] === v)) return "image/png";

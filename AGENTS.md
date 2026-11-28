@@ -33,7 +33,7 @@ use the editor.
 - Member registration must not fetch a bundled default signature; allow an empty legacy signature path and keep photos and letters in administrator-only private member storage.
 - Keep the manual-QR donation presentation in the existing donation route; do not claim form submissions are saved until a delivery service is connected.
 - QR donation submissions use a validated server function, private screenshot storage, database uniqueness for retries and UTRs, and pending status; show confirmation only after saving, because uploads do not verify payments.
-- Optional donation identity fields remain browser-local and are excluded from submissions to avoid collecting unnecessary sensitive documents.
+- Donation forms omit identity-document fields; validate optional payment screenshots through the shared submission schema and keep uploaded files private to avoid unnecessary sensitive-document collection.
 - Keep private administration page metadata in the shared admin-head helper to provide distinct titles and no-index metadata consistently.
 - Cache server-verified administrator access only in browser memory, scoped to the current token for at most five minutes and cleared on auth changes; database policies and server authorization remain authoritative.
 - Serve variable fonts locally with font-display swap and render page content immediately; defer the optional homepage gallery until near the viewport without delaying the page.

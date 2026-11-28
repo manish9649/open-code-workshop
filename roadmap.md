@@ -1,4 +1,5 @@
 # Website completion
+- [x] Remove donation ID card fields and allow submission without a payment screenshot; verified public saving as pending with no screenshot, checked the mobile form, passed 9 submission tests, and removed the verification record.
 - [x] Remove page-opening animation delays, cache verified admin navigation, serve fonts locally, defer homepage gallery; verified signed-in tab changes reuse one auth/role check and one donation fetch, sign-out blocks access, and desktop/mobile layouts render without runtime errors (49 tests passed).
 - [x] Repair Add Member photo saving: provision private member storage and remove obsolete automatic signature decoding; verified signed-in member saving and appointment-letter PDF download, then removed the test member.
 - [x] Donation receipt system: unique receipt numbers, PDF receipt + thank-you letter, private storage, admin view/download/resend, email status tracking.
